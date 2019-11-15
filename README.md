@@ -22,7 +22,14 @@
 * People can also have their middle names. 17 in total in the sample.
 * Names can be written wrong.
 
+<b> Conclusion: </b>
+* Total matches with high confidence: 8,741 + 9,716 = 18,457
+* Total matches with medium confidence: 4,920
+* Total matches: 23,377/31,601 = 73.97%
 
-
+<b> Future Work: </b>
+* Match name_match with geolocation and no ED, WD
+* Match on addresses
+* Create a unique hash of the census data
 
 
