@@ -1,1 +1,1 @@
-# hnyc-spatial-linkage
+### HNYC Spatial Research on Spatial Linkages
