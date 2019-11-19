@@ -1,39 +1,56 @@
 from elasticsearch import Elasticsearch
-import csv,time
+from argparse import ArgumentParser
+import csv,time,logging
 import pandas as pd
 import numpy as np
 from elasticsearch import helpers
 
 es = Elasticsearch('localhost:9200')
 
-def data_process():
-    df = pd.read_csv('../data/census1880_sample_LES_v04.csv')
+logging.basicConfig(filename='../doc/bulk_insert.log',
+                            filemode='a+',
+                            format='%(asctime)s %(name)s %(message)s',
+                            datefmt='%H:%M:%S',
+                            level=logging.WARNING)
+logger = logging.getLogger('InsertTime')
+
+def data_process(path, bulk_size, index):
+    df = pd.read_csv(path)
     bulk_data = []
-    for index, row in df.iterrows():
+    count = 0 
+    for itr, row in df.iterrows():
+        count+=1
         row = row.replace(np.nan,'',regex=True) #covnert nan to empty string
         data = row.to_dict() #converts the dataframe row to dictonary with their correct data type
         data['LOCATION'] = {"lat":data["LAT"],"lon":data["LONG"]}
         if type(data['ADDNUMFROM']) is str:
             data['ADDNUMFROM'] = data['ADDNUMFROM'].replace('`','')
         meta = {
-            "_index": "sample-census",
+            "_index": index,
             "_id": data['CENSUS_MERGEID'],
             "_source": data
         }
 
         bulk_data.append(meta)
-        if index%10000 == 0:
+        if itr%bulk_size == 0:
             helpers.bulk(es, bulk_data)
             bulk_data = []
-            print("INSERTING NOW", index)
-    
+            print("INSERTING NOW", itr)
+            
     helpers.bulk(es, bulk_data)
+    return count
 
 if __name__=='__main__':
-    st = time.time()
-    data_process()
-    end = time.time()
-    print("TIME TAKEN TO INSERT: ", end-st)
+    if __name__ == '__main__':
+      parser = ArgumentParser()
+      parser.add_argument("-path", help="file path to insert", default="../data/census1880_sample_LES_v04.csv")
+      parser.add_argument("-bulk", help="bulk size insert", default=10000)
+      parser.add_argument("-index", help="index name", default="sample")
+      args = parser.parse_args()
+      st = time.time()
+      size = data_process(args.path,args.bulk,args.index)
+      end = time.time()
+      logger.warning(str(size)+" "+ str(end-st))
 
 #Mapping used
 '''
