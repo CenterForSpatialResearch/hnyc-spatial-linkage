@@ -14,7 +14,7 @@ logging.basicConfig(filename='../doc/bulk_insert.log',
                             level=logging.WARNING)
 logger = logging.getLogger('InsertTime')
 
-def data_process(path, bulk_size, index):
+def do_ingest(path, bulk_size, index):
     df = pd.read_csv(path)
     bulk_data = []
     count = 0 
@@ -48,7 +48,7 @@ if __name__=='__main__':
       parser.add_argument("-index", help="index name", default="sample")
       args = parser.parse_args()
       st = time.time()
-      size = data_process(args.path,args.bulk,args.index)
+      size = do_ingest(args.path,args.bulk,args.index)
       end = time.time()
       logger.warning(str(size)+" "+ str(end-st))
 
