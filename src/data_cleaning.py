@@ -16,7 +16,7 @@ def get_matches(path):
                 { "match" : { "CENSUS_NAMELASTB" : data["CD_LAST_NAME"] } },
                 { "match" : { "WARD_NUM": data["WARD_NUM"]} },
                 { "match" : { "CENSUS_ED": data["CD_ED"]} }] } } 
-        res = es.search(index="test-census", body={ "from": 0, "size": 1, "query":query})
+        res = es.search(index="sample-census", body={ "from": 0, "size": 1, "query":query})
         if res['hits']['total']['value']!= 0:
             clean_data[data['OBJECTID']] = res['hits']['hits'][0]['_source']['CENSUS_MERGEID']
         else:

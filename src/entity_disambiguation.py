@@ -85,6 +85,7 @@ def name_fuzzy_mismatch(row,fw4):
     if res['hits']['total']['value']!= 0:
         fw4.write(row+"\n")
 
+
 if __name__=='__main__':
     # read_file()
     find_total_umatch()
