@@ -1,5 +1,7 @@
 # hnyc-spatial-linkage
 
+Match results are contained in the file `cd_census_merged_with_flag.csv`
+
 | | Observation |
 | -------------: |-----|
 | 1,116,598 | Number of records in the census directory (duplicates removed)|
