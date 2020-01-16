@@ -32,4 +32,24 @@
 * Match on addresses
 * Create a unique hash of the census data
 
+### ES queries:
+
+* Address disambiguation 1880:
+`{ "bool" : { "must" : 
+            [{ "fuzzy": { "CENSUS_NAMEFRSTB": { "value": data[0], "fuzziness": 2, "max_expansions": 50, "prefix_length": 0, "transpositions": True, "rewrite": "constant_score" } } }, 
+            {"fuzzy": { "CENSUS_NAMELASTB": { "value": data[1], "fuzziness": 2, "max_expansions": 50, "prefix_length": 0, "transpositions": True, "rewrite": "constant_score" } }},
+            { "geo_distance" : { "distance" : "1km", "LOCATION": { "lat" : round(float(data[-2]),2), "lon" : round(float(data[-1]),2)} } }
+            ]}}`
+           
+* Address disambiguation 1850:
+` { "bool": { "must": [{ "fuzzy": { "CENSUS_NAMEFRST": { "value": data['CD_FIRST_NAME'], "fuzziness": "AUTO", "max_expansions": 50, "prefix_length": 0, "transpositions": True, "rewrite": "constant_score" }}}, 
+                        {"fuzzy": { "CENSUS_NAMELAST": { "value": data['CD_LAST_NAME'], "fuzziness": "AUTO", "max_expansions": 50, "prefix_length": 0, "transpositions": True, "rewrite": "constant_score" }} },
+                        {"range": {"CENSUS_WARD_NUM": {"gte": int(data["WARD_NUM"])-1, "lte": int(data["WARD_NUM"])+1}}}
+                        ]}}`
+ 
+* Direct match 1880: 
+` { "bool" : { "must" : [{ "match" : { "CENSUS_NAMEFRSTB" : data["CD_FIRST_NAME"] } },
+                { "match" : { "CENSUS_NAMELASTB" : data["CD_LAST_NAME"] } },
+                { "match" : { "WARD_NUM": data["WARD_NUM"]} },
+                { "match" : { "CENSUS_ED": data["CD_ED"]} }] } }`
 
