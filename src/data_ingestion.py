@@ -4,6 +4,7 @@ import csv,time,logging
 import pandas as pd
 import numpy as np
 from elasticsearch import helpers
+from metaphone import doublemetaphone
 
 es = Elasticsearch('localhost:9200')
 
@@ -14,7 +15,7 @@ logging.basicConfig(filename='../doc/bulk_insert.log',
                             level=logging.WARNING)
 logger = logging.getLogger('InsertTime')
 
-def do_ingest(path, bulk_size, index, id=False):
+def do_ingest(path, bulk_size, index, id=False, metaphone=False, year="1880"):
     df = pd.read_csv(path)
     bulk_data = []
     count = 0 
@@ -27,7 +28,21 @@ def do_ingest(path, bulk_size, index, id=False):
         
         if 'ADDNUMFROM' in data and type(data['ADDNUMFROM']) is str:
             data['ADDNUMFROM'] = data['ADDNUMFROM'].replace('`','')
-        
+
+        if metaphone is True:
+          if year is "1880":
+            data['CENSUS_NAMEFRSTB'] = name_clean(data['CENSUS_NAMEFRSTB'])
+            data['CENSUS_NAMELASTB'] = name_clean(data['CENSUS_NAMELASTB'])
+            data['METAPHONE_NAMEFIRST'] = [i for i in doublemetaphone(data['CENSUS_NAMEFRSTB']) if i]
+            data['METAPHONE_NAMELAST'] = [i for i in doublemetaphone(data['CENSUS_NAMELASTB']) if i]
+
+          if year == "1850":
+            data['CENSUS_NAMEFRST'] = name_clean(data['CENSUS_NAMEFRST'])
+            data['CENSUS_NAMELAST'] = name_clean(data['CENSUS_NAMELAST'])
+            data['METAPHONE_NAMEFIRST'] = [i for i in doublemetaphone(data['CENSUS_NAMEFRST']) if i]
+            data['METAPHONE_NAMELAST'] = [i for i in doublemetaphone(data['CENSUS_NAMELAST']) if i]
+
+
         if id is not False:
           meta = {
               "_index": index,
@@ -45,8 +60,12 @@ def do_ingest(path, bulk_size, index, id=False):
             helpers.bulk(es, bulk_data)
             bulk_data = []
             print("INSERTING NOW", itr)
+
     helpers.bulk(es, bulk_data)
     return count
+
+def name_clean(name):
+  return max(name.split(' '), key=len)
 
 if __name__=='__main__':
     if __name__ == '__main__':
@@ -55,13 +74,15 @@ if __name__=='__main__':
       parser.add_argument("-bulk", help="bulk size insert", default=10000,type=int)
       parser.add_argument("-index", help="index name", default="sample")
       parser.add_argument("-id", help="unique id field name", required=False)
+      parser.add_argument("-metaphone", help="compute metaphone for first and last name", required=False)
+      parser.add_argument("-year", help="census year", required=True)
 
       args = parser.parse_args()
       st = time.time()
       if args.id is False:
-        size = do_ingest(args.path,args.bulk,args.index)
+        size = do_ingest(args.path,args.bulk,args.index,metaphone=bool(args.metaphone),year =args.year)
       else:
-        size = do_ingest(args.path,args.bulk,args.index,args.id)
+        size = do_ingest(args.path,args.bulk,args.index,args.id,metaphone=bool(args.metaphone),year=args.year)
       end = time.time()
       logger.warning(args.index +" "+ str(size)+" "+ str(end-st))
  
