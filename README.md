@@ -1,12 +1,12 @@
 # hnyc-spatial-linkage
 
 ### Description of scripts:
-1. preprocess.ipynb - Reads the source files - [cd_1880_mn_v04.csv](https://drive.google.com/open?id=1jfTtmmBLtWpJydUI2nRJQYXrzDHx8K-q), [census_1880_mn_v04.csv](https://drive.google.com/open?id=11jpmKMhbB0waX7vwwn5_5sBu4nBfvJ-F) and prepares corresponding files - `cd_final.csv` and `census_final.csv` to run the code to link records on.
-2. hnyc_queries_spark.ipynb - Reads `cd_final.csv` and `census_final.csv` and runs code to link the records using spark. Spark is preferred due to the large computation required when doing the joins.
+1. **preprocess.ipynb** - Reads the source files - [cd_1880_mn_v04.csv](https://drive.google.com/open?id=1jfTtmmBLtWpJydUI2nRJQYXrzDHx8K-q), [census_1880_mn_v04.csv](https://drive.google.com/open?id=11jpmKMhbB0waX7vwwn5_5sBu4nBfvJ-F) and prepares corresponding files - `cd_final.csv` and `census_final.csv` to run the code to link records on.
+2. **hnyc_queries_spark.ipynb** - Reads `cd_final.csv` and `census_final.csv` and runs code to link the records using spark. Spark is preferred due to the large computation required when doing the joins.
 
 Match results are contained in the file `cd_census_merged_with_flag.csv`
 
-3. disambiguation_analysis.ipynb - experiment with Jaro-Winkler distance between the names and other information recorded for the individuals to get a condifence score for the matches. 
+3. **disambiguation_analysis.ipynb** - experiment with Jaro-Winkler distance between the names and other information recorded for the individuals to get a condifence score for the matches. 
 
 The final results with the confidence score are in the file `match_results_confidence_score.csv`
 
