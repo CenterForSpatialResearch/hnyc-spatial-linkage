@@ -2,7 +2,7 @@
 
 ### Description of scripts:
 1. preprocess.ipynb - Reads the source files - [cd_1880_mn_v04.csv](https://drive.google.com/open?id=1jfTtmmBLtWpJydUI2nRJQYXrzDHx8K-q), [census_1880_mn_v04.csv](https://drive.google.com/open?id=11jpmKMhbB0waX7vwwn5_5sBu4nBfvJ-F) and prepares corresponding files - `cd_final.csv` and `census_final.csv` to run the code to link records on.
-2. hnyc_queries_spark.ipynb - Reads `cd_final.csv` and `census_final.csv` and runs the code using spark. Spark is preferred due to the large computation required when doing the joins.
+2. hnyc_queries_spark.ipynb - Reads `cd_final.csv` and `census_final.csv` and runs code to link the records using spark. Spark is preferred due to the large computation required when doing the joins.
 
 Match results are contained in the file `cd_census_merged_with_flag.csv`
 
