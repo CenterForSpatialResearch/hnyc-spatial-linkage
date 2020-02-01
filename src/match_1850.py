@@ -7,10 +7,11 @@ from elasticsearch import exceptions
 
 with open('../doc/config.json') as json_data_file:
     config = json.load(json_data_file)
+
 es = Elasticsearch(host=config['host'], port=config['port'])
 
 def match_addr():
-    df = pd.read_csv(config['cd_filename_1850'])
+    df = pd.read_csv(config['cd_filename'])
     count, match,unmatch = 0,0,0
     with open(config['match_output_filename'],'w') as fw, open(config['unmatch_output_filename'],'w') as fw2:
         writer = csv.writer(fw)
@@ -58,7 +59,7 @@ def match_addr():
 
             
             try:
-                res = es.search(index="mn-census-1850", body={ "from": 0, "size": 10000, "query":query})
+                res = es.search(index=config["es-index"], body={ "from": 0, "size": 10000, "query":query})
             except exceptions.RequestError:
                 print("Exception at row id: ", index)
                 continue

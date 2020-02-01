@@ -1,6 +1,6 @@
 from elasticsearch import Elasticsearch
 from argparse import ArgumentParser
-import csv,time,logging
+import csv,time,logging, json
 import pandas as pd
 import numpy as np
 from elasticsearch import helpers
@@ -15,8 +15,8 @@ logging.basicConfig(filename='../doc/bulk_insert.log',
                             level=logging.WARNING)
 logger = logging.getLogger('InsertTime')
 
-def do_ingest(path, bulk_size, index, id=False, metaphone=False, year="1880"):
-    df = pd.read_csv(path)
+def ingest(config):
+    df = pd.read_csv(config['census_filename'])
     bulk_data = []
     count = 0 
     for itr, row in df.iterrows():
@@ -29,34 +29,27 @@ def do_ingest(path, bulk_size, index, id=False, metaphone=False, year="1880"):
         if 'ADDNUMFROM' in data and type(data['ADDNUMFROM']) is str:
             data['ADDNUMFROM'] = data['ADDNUMFROM'].replace('`','')
 
-        if metaphone is True:
-          if year is "1880":
-            data['CENSUS_NAMEFRSTB'] = name_clean(data['CENSUS_NAMEFRSTB'])
-            data['CENSUS_NAMELASTB'] = name_clean(data['CENSUS_NAMELASTB'])
-            data['METAPHONE_NAMEFIRST'] = [i for i in doublemetaphone(data['CENSUS_NAMEFRSTB']) if i]
-            data['METAPHONE_NAMELAST'] = [i for i in doublemetaphone(data['CENSUS_NAMELASTB']) if i]
-
-          if year == "1850":
-            data['CENSUS_NAMEFRST'] = name_clean(data['CENSUS_NAMEFRST'])
-            data['CENSUS_NAMELAST'] = name_clean(data['CENSUS_NAMELAST'])
-            data['METAPHONE_NAMEFIRST'] = [i for i in doublemetaphone(data['CENSUS_NAMEFRST']) if i]
-            data['METAPHONE_NAMELAST'] = [i for i in doublemetaphone(data['CENSUS_NAMELAST']) if i]
-
-
+        data[config['census_first_name']] = name_clean(data[config['census_first_name']])
+        data[config['census_last_name']] = name_clean(data[config['census_last_name']])
+        
+        if config['metaphone'] is 1:
+          data['METAPHONE_NAMEFIRST'] = [i for i in doublemetaphone(data[config['census_first_name']]) if i]
+          data['METAPHONE_NAMELAST'] = [i for i in doublemetaphone(data[config['census_last_name']]) if i]
+        
         if id is not False:
           meta = {
-              "_index": index,
-              "_id": data[id],
+              "_index": config['es-index'],
+              "_id": config['es-id'],
               "_source": data
           }
         else:
           meta = {
-              "_index": index,
+              "_index": config['es-index'],
               "_source": data
           }
 
         bulk_data.append(meta)
-        if itr%bulk_size == 0:
+        if itr%config['ingest_size'] == 0:
             helpers.bulk(es, bulk_data)
             bulk_data = []
             print("INSERTING NOW", itr)
@@ -70,19 +63,16 @@ def name_clean(name):
 if __name__=='__main__':
     if __name__ == '__main__':
       parser = ArgumentParser()
-      parser.add_argument("-path", help="file path to insert", default="../data/census1880_sample_LES_v04.csv")
-      parser.add_argument("-bulk", help="bulk size insert", default=10000,type=int)
-      parser.add_argument("-index", help="index name", default="sample")
-      parser.add_argument("-id", help="unique id field name", required=False)
-      parser.add_argument("-metaphone", help="compute metaphone for first and last name", required=False)
-      parser.add_argument("-year", help="census year", required=True)
+      parser.add_argument("-config", help="config file path", default="../data/census1880_sample_LES_v04.csv")
 
       args = parser.parse_args()
+
+      with open(args.path) as json_data_file:
+        config = json.load(json_data_file)
+
+
       st = time.time()
-      if args.id is False:
-        size = do_ingest(args.path,args.bulk,args.index,metaphone=bool(args.metaphone),year =args.year)
-      else:
-        size = do_ingest(args.path,args.bulk,args.index,args.id,metaphone=bool(args.metaphone),year=args.year)
+      ingest(config)
       end = time.time()
       logger.warning(args.index +" "+ str(size)+" "+ str(end-st))
  
