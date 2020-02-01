@@ -1,0 +1,18 @@
+{
+    "host": "localhost",
+    "port": 9200,
+    "year": 1850,
+    "cd_filename": "../data/cd_1850_mn_v04.csv",
+    "census_filename": "../data/census_1850_mn_v04.csv",
+    "census_first_name": "CENSUS_NAMEFRST",
+    "census_last_name": "CENSUS_NAMELAST",
+    "match_output_filename": "../data/test.csv",
+    "unmatch_output_filename": "../data/test-u.csv",
+    "es-index": "mn-census-1850",
+    "es-id": "CENSUS_IPUMS_UID",
+    "ingest_size": 10000,
+    "metaphone": 1,
+    "edit_distance": 2,
+    "output_census_cols": ["CENSUS_IPUMS_UID","CENSUS_NAMEFRST","CENSUS_NAMELAST","CENSUS_WARD_NUM","CENSUS_AGE", "CENSUS_DWELLIN_NUM", "CENSUS_DWELLING_SEQ","CENSUS_OCCSTR"],
+    "output_city_directory_cols": ["OBJECTID","CD_FIRST_NAME","CD_LAST_NAME","CD_ADDRESS", "BLOCK_NUM","CD_OCCUPATION"]
+}
