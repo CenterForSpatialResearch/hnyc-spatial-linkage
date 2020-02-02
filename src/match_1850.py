@@ -5,7 +5,7 @@ import json, csv
 from metaphone import doublemetaphone
 from elasticsearch import exceptions
 
-with open('../doc/config.json') as json_data_file:
+with open('../doc/config_1850.json') as json_data_file:
     config = json.load(json_data_file)
 
 es = Elasticsearch(host=config['host'], port=config['port'])
@@ -14,15 +14,13 @@ def match_addr():
     df = pd.read_csv(config['cd_filename'])
     count, match,unmatch = 0,0,0
     with open(config['match_output_filename'],'w') as fw, open(config['unmatch_output_filename'],'w') as fw2:
-        writer = csv.writer(fw)
+        writer = csv.writer(fw, delimiter="\t")
         columns = config["output_census_cols"] + config["output_city_directory_cols"]
         rows=""
         for cols in columns:
-            rows = rows + cols + ","
+            rows = rows + cols + "\t"
         
-        writer.writerow([rows.rstrip(",")])
-        
-        # fw.write('CENSUS_IPUMS_UID'+","+'CENSUS_NAMEFRST'+","+'CENSUS_NAMELAST'+","+'CENSUS_WARD_NUM'+","+'OBJECTID'+","+'CD_FIRST_NAME'+","+'CD_LAST_NAME'+","+'CD_ADDRESS'+","+'BLOCK_NUM'+","+'CENSUS_AGE'+","+'CENSUS_DWELLIN_NUM'+","+'CENSUS_DWELLLING_SEQ'+","+'CENSUS_OCCSTR'+","+"CD_OCCUPATION")
+        writer.writerow([rows.rstrip("\t")])
         for index, row in df.iterrows():
             row = row.replace(np.nan,'',regex=True) #covnert nan to empty string
             data = row.to_dict()
@@ -63,23 +61,19 @@ def match_addr():
             except exceptions.RequestError:
                 print("Exception at row id: ", index)
                 continue
-
+            
             if res['hits']['total']['value']!= 0:
                 match+=1
                 for i in res['hits']['hits']:
                     i = i['_source']
                     content = ""
                     for j in config["output_census_cols"]:
-                        content = content + str(i[j]) + ","
+                        content = content + str(i[j]) + "\t"
 
-                    # print(data)
                     for j in config["output_city_directory_cols"]:
-                        content = content + str(data[j]) + ","
-                     
-                    # wr = i['CENSUS_IPUMS_UID']+","+i['CENSUS_NAMEFRST']+","+i['CENSUS_NAMELAST']+","+str(i['CENSUS_WARD_NUM'])+","+str(data['OBJECTID'])+","+data['CD_FIRST_NAME']+","+data['CD_LAST_NAME']+","+data['CD_ADDRESS']+","+ str(data['BLOCK_NUM'])+","+str(i['CENSUS_AGE'])+","+ str(i['CENSUS_DWELLIN_NUM'])+","+ str(i['CENSUS_DWELLING_SEQ'])+","+i['CENSUS_OCCSTR']+","+data['CD_OCCUPATION']
-                    # fw.write(wr+"\n")
-                    print(content)
-                    writer.writerow([content.rstrip(",")])
+                        content = content + str(data[j]) + "\t"
+
+                    writer.writerow([content.rstrip("\t")])
             else:
                 fw2.write(str(data['OBJECTID'])+"\n")
                 unmatch+=1

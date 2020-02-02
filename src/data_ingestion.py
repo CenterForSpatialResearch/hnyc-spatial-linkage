@@ -39,7 +39,7 @@ def ingest(config):
         if id is not False:
           meta = {
               "_index": config['es-index'],
-              "_id": config['es-id'],
+              "_id": data[config['es-id']],
               "_source": data
           }
         else:
@@ -53,7 +53,7 @@ def ingest(config):
             helpers.bulk(es, bulk_data)
             bulk_data = []
             print("INSERTING NOW", itr)
-
+            
     helpers.bulk(es, bulk_data)
     return count
 
@@ -67,14 +67,14 @@ if __name__=='__main__':
 
       args = parser.parse_args()
 
-      with open(args.path) as json_data_file:
+      with open(args.config) as json_data_file:
         config = json.load(json_data_file)
 
 
       st = time.time()
       ingest(config)
       end = time.time()
-      logger.warning(args.index +" "+ str(size)+" "+ str(end-st))
+      logger.warning(config["es-index"] +" "+ str(end-st))
  
 #Mapping used
 '''
