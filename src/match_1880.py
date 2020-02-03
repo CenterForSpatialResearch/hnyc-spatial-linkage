@@ -29,8 +29,8 @@ def get_matches():
         for cols in columns:
             rows = rows + cols + "\t"
         
-        writer.writerow([rows.rstrip("\t")])
-
+        writer.writerow(rows.rstrip("\t").split("\t"))
+        
         for idx, row in df.iterrows():
             row = row.replace(np.nan,'',regex=True) #covnert nan to empty string
             data = row.to_dict()
@@ -96,10 +96,12 @@ def get_matches():
 
                     for j in config["output_city_directory_cols"]:
                         content = content + str(data[j]) + "\t"
-                    writer.writerow([content.rstrip("\t")])
-            else:
+
+                    writer.writerow(content.rstrip("\t").split("\t"))
+
                 fw2.write(str(data['OBJECTID'])+"\n")
                 count_unmatch+=1
+            
 
     logging.warn("Total city directory matched: "+ str(count_match))
     logging.warn("Total city directory unmatched: "+ str(count_unmatch))

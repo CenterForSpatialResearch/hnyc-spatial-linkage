@@ -14,13 +14,13 @@ def match_addr():
     df = pd.read_csv(config['cd_filename'])
     count, match,unmatch = 0,0,0
     with open(config['match_output_filename'],'w') as fw, open(config['unmatch_output_filename'],'w') as fw2:
-        writer = csv.writer(fw, delimiter="\t")
+        writer = csv.writer(fw, delimiter="\t",quotechar='"')
         columns = config["output_census_cols"] + config["output_city_directory_cols"]
         rows=""
         for cols in columns:
             rows = rows + cols + "\t"
         
-        writer.writerow([rows.rstrip("\t")])
+        writer.writerow(rows.rstrip("\t").split("\t"))
         for index, row in df.iterrows():
             row = row.replace(np.nan,'',regex=True) #covnert nan to empty string
             data = row.to_dict()
@@ -73,7 +73,7 @@ def match_addr():
                     for j in config["output_city_directory_cols"]:
                         content = content + str(data[j]) + "\t"
 
-                    writer.writerow([content.rstrip("\t")])
+                    writer.writerow(content.rstrip("\t").split("\t"))
             else:
                 fw2.write(str(data['OBJECTID'])+"\n")
                 unmatch+=1
