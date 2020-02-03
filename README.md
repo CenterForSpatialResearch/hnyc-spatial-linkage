@@ -8,8 +8,14 @@ Match results are contained in the file `cd_census_merged.csv`
 
 3. **disambiguation_analysis.ipynb** - experiment with Jaro-Winkler distance between the names and other information recorded for the individuals to get a condifence score for the matches. 
 
-The final results with the confidence score are in the file `match_results_confidence_score.csv`
+#### Calculation of the confidence score, as implemented in script 3:
 
+    0.5 x (jaro-winkler score) + 0.35 x (1/number of conflicts) + 0.15 x (1 if census occupation listed else 0)
+
+where, *jaro-winkler score* = .4 x (jaro-winkler score of first names) + .6 x (jaro-winkler score of last names)
+
+
+#### The final results with the confidence score are in the file `match_results_confidence_score.csv`
 
 
 | | Observation |
@@ -23,3 +29,9 @@ The final results with the confidence score are in the file `match_results_confi
 | 27,242 | Number of city directory records with more than one potential match |
 | 1,898 | Number of unique matches where **AGE** in CENSUS record is **12 years or lesser** |
 | 15,612 | Number of *non*-unique matches where **AGE** in CENSUS record is **12 years or lesser** |
+
+
+#### Deomonstration of obtaining confidence score on the output of Elastic Search (implemented by Amogh Mishra @AmoghM):
+
+- `test.csv` is a sample output from the elastic search based matching process
+- **get_confidence_score.ipynb** reads the file `test.csv` and adds a column with the confidence score of the matches
