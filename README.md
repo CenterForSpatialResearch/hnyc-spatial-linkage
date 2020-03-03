@@ -1,4 +1,4 @@
-### HNYC Spatial Research on Spatial Linkages
+# HNYC Spatial Research on Spatial Linkages
 
 
 1. Install elasticsearch from: https://www.elastic.co/guide/en/elasticsearch/reference/current/install-elasticsearch.html
@@ -12,8 +12,22 @@ To run scripts:
 3. Match data for 1880: `python match_1880.py`
 4. Match data for 1850: `python match_1850.py
 
+## Summary of Processes Taken in Fall 2019
+### 1880 Process
+Two sources:  
+- **City Directory**: name (first, last, initial), address, ID, occupation, ED, ward, block number (constructed)  
+- **Census**: address (hidden during match process), ID (different from CD), occupation, ED, ward, age, gender, dwelling, household characteristics
 
-#### Analysis report (till now)
+Steps:  
+0. Preprocessing: changing names to their phonetic index  
+1. Initial entity link (to generate possible matches): criteria = same ED + JW dist < 2 on indexed name  
+2. Disambiguation (to choose between non-unique matches):  
+  a. Generate a confidence score based on occupation (having occupation), age > 12, JW dist of name, relative probability (number of non-unique matches)  
+
+### 1850
+Similar, but no ED and address data, only ward data in the census.
+
+## Analysis report (till now)
 
 <b> Task: Link the city directory entries with the Census data of 1880. </b>
   
