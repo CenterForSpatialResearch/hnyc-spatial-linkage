@@ -22,7 +22,7 @@ Steps:
 0. Preprocessing: changing names to their phonetic index  
 1. Initial entity link (to generate possible matches): criteria = same ED + JW dist < 2 on indexed name  
 2. Disambiguation (to choose between non-unique matches):  
-  a. Generate a confidence score based on occupation (having occupation), age > 12, JW dist of name, relative probability (number of non-unique matches)  
+  a. Generate a confidence score based on occupation (having occupation), age > 12 (**not implemented**), JW dist of name, relative probability (number of non-unique matches)  
 
 ### 1850
 Similar, but no ED and address data, only ward data in the census.
