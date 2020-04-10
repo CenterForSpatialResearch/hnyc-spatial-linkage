@@ -6,6 +6,7 @@ Accomplished:
 2. Merged lat lng data to matched data -> produced `matched.csv` 
 3. Experimented with methods to add spatial weights, including graph-based and cluster-based approaches on a subset of the data (see `spatial-disambiguation.ipynb`)
 4. Outlined overall workflow for disambiguation using bipartite graph matching algorithm (`linkage-disambiguation.ipynb`).
+5. Ran algorithms on full dataset & obtained initial performance metrics
 
 ## Summary of Processes Taken in Fall 2019
 ### 1880 Process
@@ -35,4 +36,9 @@ Similar, but no ED and address data, only ward data in the census.
   - `disambiguation_analysis.ipynb`: EDA on confidence scores -- generates `match_results_confidence_score.csv` and `fall_2019_disambiguation_report.md`
   - `disambiguation_2.ipynb`: adding of census conflicts to confidence score, merging of lat lng data
   - `spatial-disambiguation.ipynb`: documentation of different spatial weight algorithms
-  - `linkage-disambiguation.ipynb`: outline record linkage approach 
+  - `linkage-disambiguation.ipynb`: outline record linkage approach
+  - `disambiguation_algorithm_tuning.ipynb`: applies algorithms to the whole dataset + initial performance analysis
+- `/disambiguation` is a python module containing wrapper functions needed in the disambiguation process
+  - `preprocess.py` contains functions needed before applying disambiguation algorithms
+  - `linkage.py` contains functions needed for disambiguation
+  - `visualization.py` wrapper functions to visualize outputs, will need developing
