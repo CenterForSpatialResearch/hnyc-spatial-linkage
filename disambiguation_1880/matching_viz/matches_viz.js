@@ -81,19 +81,44 @@ legend
     .text("ES Match");
 
 // link to input
-var form = document.getElementById("selectED");
-form.addEventListener("change", function() {
+var selED = document.getElementById("selectED");
+selED.addEventListener("change", function() {
     let ed = document.getElementById("selectED").value;
-    plotData(ed);
+    plotData(ed, "ED");
+});
+
+/*
+var selGraph = document.getElementById("selectGraph");
+selGraph.addEventListener("change", function() {
+    let graph = document.getElementById("selectGraph").value;
+    plotData(graph, "graph");
+});
+*/
+var inputGraph = document.getElementById("selectGraph");
+inputGraph.addEventListener("keyup", function(event) {
+
+    // pressed enter
+    if (event.keyCode === 13) {
+        let graph = document.getElementById("selectGraph").value;
+        plotData(graph, "graph");
+    }
 });
 
 // plot data for that ED
-function plotData(ed) {
+function plotData(value, type) {
 
     d3.select("#matches_map").selectAll("svg").attr("pointer-events", "all");
         
     d3.csv("data/matched_viz.csv", function(data) {
-        data = data.filter(function(d){return d.CENSUS_ENUMDIST == ed;});
+        console.log(typeof(data[0].graph_ID));
+        
+        if (type == "ED"){
+            data = data.filter(function(d){return d.CENSUS_ENUMDIST == value;});
+        } else if (type == "graph") {
+            data = data.filter(function(d){ return parseInt(d.graph_ID) == value;});
+        }
+        console.log(data);
+
         var i = Math.floor(data.length / 2);
 
         map.flyTo( [data[i].LAT, data[i].LONG], zoom=18 );
@@ -214,11 +239,13 @@ function plotData(ed) {
             });
         
         // plot table
-        var header = ['CD_ID', 'CENSUS_ID', 
+        var header = ['CENSUS_ENUMDIST', 'graph_ID',
+                      'CD_ID', 'CENSUS_ID', 
                       'CD_FIRST_NAME', 'CD_LAST_NAME', 'MATCH_ADDR', 'CD_OCCUPATION',
                       'CENSUS_NAMEFRSCLEAN', 'CENSUS_NAMELASTB', 'CENSUS_MATCH_ADDR', 'CENSUS_AGE', 'CENSUS_OCCLABELB',
                       'confidence_score_x', 'in_cluster', 'spatial_weight', 'selected'];
-        var headerLabs = ['CD', 'CENSUS',
+        var headerLabs = ['ED', 'graph',
+                          'CD', 'CENSUS',
                           'CD FR', 'CD LN', 'CD Add', 'CD Occ',
                           'Cen FN', 'Cen LN', 'Cen Add', 'Age', 'Cen Occ', 
                           'Confidence', 'Cluster', 'Weight', 'Select'];
@@ -277,6 +304,7 @@ clear.addEventListener("click", function() {
     for (var i = 0; i < rows.length; i++) {
         rows[i].style.backgroundColor = "#fff";
     }
+
 });
 
 // empty all
@@ -286,4 +314,6 @@ empty.addEventListener("click", function() {
 
     document.getElementById("results").innerHTML = "";
     document.getElementById("selectED").selectedIndex = "none";
+
+    document.getElementById("selectGraph").value = "";
 });

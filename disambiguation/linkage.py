@@ -86,7 +86,7 @@ Note that subgraph MUST have prefixes on the cd_id ('CD_') and census_id ('CENSU
 The matching algorithm (maximum weighted matching) will 
     (1) select sets of matches that give the highest number of matches 
     (2) choose the match set that has the highest weight based on that
-Returns a dictionary with 'graph' as the list of bipartite graphs and 'results' being the original df with an additional 'selected' column, indicating the correct match.
+Returns a dictionary with 'graph' as the list of bipartite graphs and 'results' being the original df with an additional 'selected' column, indicating the correct match and 'graph_id' column, indicated subgraph.
 """
 def get_matches(sub_graph, cd_id = 'CD_ID', census_id = 'CENSUS_ID', weight = 'spatial_weight'):
     b_edges = [(row[cd_id], row[census_id], row[weight]) for index, row in sub_graph.iterrows()]
@@ -102,4 +102,12 @@ def get_matches(sub_graph, cd_id = 'CD_ID', census_id = 'CENSUS_ID', weight = 's
 
     sub_graph = sub_graph.merge(matches, how='left', on=[cd_id, census_id], validate='one_to_one')
     sub_graph['selected'] = sub_graph['selected'].fillna(0)
+
+    # add subgraph id
+    for i in range(0, len(subgraphs)):
+        nodes = list(subgraphs[i].nodes)
+        for node in nodes:
+            if node[:2] == 'CD':
+                final_processed.at[final_processed.CD_ID == node, 'graph_ID'] = i
+
     return {'graph': subgraphs, 'results': sub_graph}
