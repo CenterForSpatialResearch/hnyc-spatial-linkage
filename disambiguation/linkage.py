@@ -9,9 +9,7 @@ df: dataframe of records with confidence score and node ID, names can be modifie
 graph: graph object created from create_path_graph()
 source: start node, e.g. 'A0'. By default it chooses first row in the table
 target: end node, e.g. 'J0'. By default it chooses last row in the table
-Returns a dictionary of:
-    'df': dataframe of matches with added 'spatial weight'
-    'shortest_path': list containing nodes in the shortest path
+Returns a dataframe of matches with added 'spatial weight'
 """
 def apply_shortest_path(df, graph, source = None, target = None, confidence = 'confidence_score', node_id = 'node_ID'):
     if source == None:
@@ -22,7 +20,7 @@ def apply_shortest_path(df, graph, source = None, target = None, confidence = 'c
     path = nx.dijkstra_path(graph, source, target)
     df['spatial_weight'] = df.apply(lambda row: row[confidence] + 1 if row[node_id] in path else row[confidence], axis = 1)
 
-    return {'df': df, 'shortest_path': path}
+    return df
 
 """
 Apply betweenness centrality using k shortest paths (as documented in spatial_disambiguation.ipynb)
@@ -30,19 +28,19 @@ df: df of matches
 graph: graph object created from create_path_graph()
 source: start node, e.g. 'A0'. By default it chooses first row in the table
 target: end node, e.g. 'J0'. By default it chooses last row in the table
-k: how many shortest paths to choose from (absolute number). By default ~ 1/2 of number of possible paths
+k: how many shortest paths to choose from (absolute number). By default 1 or ~ 1/2 of number of possible paths if there are more than 30 paths
 scale: how much to scale the score by when adding it with confidence score. Default = 1 (equal weight of confidence score and spatial weight)
 Returns
     df: df with spatial weights column
-    weights: list of between centrality weights
+    k_paths: paths used for calculation
 """
-def apply_k_betweenness(df, graph, source=None, target=None, weight="weight", k=None, scale=1, node_id = 'node_ID'):
+def apply_k_betweenness(df, graph, source=None, target=None, k=None, scale=1):
     if source == None:
-        source = list(df[node_id])[0]
+        source = list(df["node_ID"])[0]
     if target == None:
-        target = list(df[node_id])[-1]
+        target = list(df["node_ID"])[-1]
 
-    k_paths = list(nx.shortest_simple_paths(graph, source, target, weight=weight))
+    k_paths = list(nx.shortest_simple_paths(graph, source, target, weight="weight"))
     length = len(k_paths)
 
     if k == None:    
@@ -61,20 +59,20 @@ def apply_k_betweenness(df, graph, source=None, target=None, weight="weight", k=
             spatial_weights[node] += 1
     
     spatial_weights = [[key , round(value / k, 2) * scale] for key, value in spatial_weights.items()]
-    spatial_df = pd.DataFrame(spatial_weights, columns=[node_id, 'spatial_weight'])
-    df = df.merge(spatial_df, how="inner", on=node_id, validate="one_to_one")
+    spatial_df = pd.DataFrame(spatial_weights, columns=["node_ID", 'spatial_weight'])
+    df = df.merge(spatial_df, how="inner", on="node_ID", validate="one_to_one")
     df['spatial_weight'] = df['spatial_weight'] + df['confidence_score']
 
-    return {'df': df, 'weights': spatial_weights, 'paths': k_paths}
+    return df
 
 """
 Apply density based clustering to detect outliers. Requires `hdbscan` library
 Refer to hdbscan documentation on parameters
 Returns df with a column 'in_cluster' indicating which cluster the nodes are in
 """
-def apply_density_clustering(df, min_cluster_size=10, min_samples=10, allow_single_cluster=True, lat='LAT', lon="LONG"):
+def apply_density_clustering(df, lat='LAT', lon="LONG", min_cluster_size=10, min_samples=10, allow_single_cluster=True, **kwargs):
     cluster_sub = df.loc[:, [lon, lat]]
-    clusterer = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size, min_samples=min_samples, allow_single_cluster=allow_single_cluster).fit(cluster_sub)
+    clusterer = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size, min_samples=min_samples, allow_single_cluster=allow_single_cluster, **kwargs).fit(cluster_sub)
 
     df['in_cluster'] = pd.Series(clusterer.labels_).values
 
@@ -88,8 +86,8 @@ The matching algorithm (maximum weighted matching) will
     (2) choose the match set that has the highest weight based on that
 Returns a dictionary with 'graph' as the list of bipartite graphs and 'results' being the original df with an additional 'selected' column, indicating the correct match and 'graph_id' column, indicated subgraph.
 """
-def get_matches(sub_graph, cd_id = 'CD_ID', census_id = 'CENSUS_ID', weight = 'spatial_weight'):
-    b_edges = [(row[cd_id], row[census_id], row[weight]) for index, row in sub_graph.iterrows()]
+def get_matches(df, cd_id = 'CD_ID', census_id = 'CENSUS_ID', weight = 'spatial_weight'):
+    b_edges = [(row[cd_id], row[census_id], row[weight]) for index, row in df.iterrows()]
     b = nx.Graph()
     b.add_weighted_edges_from(b_edges)
 
@@ -100,14 +98,12 @@ def get_matches(sub_graph, cd_id = 'CD_ID', census_id = 'CENSUS_ID', weight = 's
     matches = pd.DataFrame(matches, columns=[cd_id, census_id])
     matches['selected'] = 1
 
-    sub_graph = sub_graph.merge(matches, how='left', on=[cd_id, census_id], validate='one_to_one')
-    sub_graph['selected'] = sub_graph['selected'].fillna(0)
+    df = df.merge(matches, how='left', on=[cd_id, census_id], validate='one_to_one')
+    df['selected'] = df['selected'].fillna(0)
 
     # add subgraph id
-    for i in range(0, len(subgraphs)):
-        nodes = list(subgraphs[i].nodes)
-        for node in nodes:
-            if node[:2] == 'CD':
-                final_processed.at[final_processed.CD_ID == node, 'graph_ID'] = i
+    subgraph_id = [{'graph_ID': i, 'CD_ID': node} for i in range(0, len(subgraphs)) for node in list(subgraphs[i].nodes) if node[:2] == 'CD']
+    subgraph_id = pd.DataFrame(subgraph_id)
+    df = df.merge(subgraph_id, how="inner", left_on=cd_id, right_on="CD_ID", validate="many_to_one")
 
-    return {'graph': subgraphs, 'results': sub_graph}
+    return {'graph': subgraphs, 'results': df}

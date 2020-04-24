@@ -1,5 +1,31 @@
 import pandas as pd
 import networkx as nx
+import numpy as np
+
+"""
+Create a dictionary, with keys as group ID and values as a dataframe bounded by anchors
+Each dataframe is one where spatial disambiguation will be applied
+This is necessary as else, algorithms take too long to run
+Match: df of matches
+confidence_score: name of confidence score column
+"""
+
+def create_subdict(match, confidence="confidence_score"):
+    
+    # identify anchors and assign anchor ID
+    match['anchor'] = np.where(match[confidence] == 1, 1, None)
+    sub_group = pd.DataFrame({'index': list(match.loc[match.anchor.notnull(), :].index), 'group_ID': range(0, sum(match['anchor'].notnull()))}).set_index('index')
+    match = match.join(sub_group)
+    match['group_ID'] = match['group_ID'].fillna(method='ffill').fillna(method='backfill')
+
+    # split df into multiple df, each bounded by anchor
+    sub_group_dict = {group: df for group, df in match.groupby('group_ID')}
+
+    # add bottom anchor back
+    for i in range(0, len(sub_group_dict) - 1):
+        sub_group_dict[i] = pd.concat([sub_group_dict[i], sub_group_dict[i+1][0:1]])
+
+    return sub_group_dict
 
 """
 Create node ID for each match, to be using the shortest path algorithm 
@@ -11,10 +37,8 @@ node_ID: unique node ID. each node is a match, so e.g. A0 and A1 refers to two p
 letter: grouping for identical census records 
 add_prefixes: whether to add prefixes 'CD_' and 'CENSUS_' to cd_id and census_id respectively. prefixes are required for subsequent bipartite matching
 """
-def create_path_df(sub, cd_id = "CD_ID", census_id = "CENSUS_ID", lon = "LONG", lat = "LAT", confidence = "confidence_score", address = "MATCH_ADDR"):
-    sub_graph = sub.loc[:, [cd_id, census_id, lon, lat, confidence, address]]
-        
-    sub_graph['anchor'] = sub_graph[confidence].apply(lambda x: 1 if x == 1 else 0)
+def create_path_df(sub_graph, census_id = "CENSUS_ID", confidence = "confidence_score"):
+    
     sub_graph['node_ID'] = sub_graph.groupby(census_id).cumcount()
 
     letter_id = sub_graph[census_id].unique().tolist()

@@ -109,15 +109,13 @@ function plotData(value, type) {
 
     d3.select("#matches_map").selectAll("svg").attr("pointer-events", "all");
         
-    d3.csv("data/matched_viz.csv", function(data) {
-        console.log(typeof(data[0].graph_ID));
+    d3.csv("data/matched_viz_v2.csv", function(data) {
         
         if (type == "ED"){
             data = data.filter(function(d){return d.CENSUS_ENUMDIST == value;});
         } else if (type == "graph") {
             data = data.filter(function(d){ return parseInt(d.graph_ID) == value;});
         }
-        console.log(data);
 
         var i = Math.floor(data.length / 2);
 
@@ -202,10 +200,17 @@ function plotData(value, type) {
             .attr("x2", function(d) { return map.latLngToLayerPoint([d.CENSUS_Y, d.CENSUS_X]).x; })
             .attr("y2", function(d) { return map.latLngToLayerPoint([d.CENSUS_Y, d.CENSUS_X]).y; })            
             .attr("stroke", function(d) {
-                if (d.selected == 1) {
+                if (d.selected_algo == 1) {
                     return "black";
                 } else {
                     return "grey";
+                }
+            })
+            .attr("stroke-dasharray", function(d) {
+                if (d.selected_dist == 1) {
+                    return "none";
+                } else {
+                    return "20";
                 }
             })
             .attr("stroke-width", 3)
@@ -239,16 +244,16 @@ function plotData(value, type) {
             });
         
         // plot table
-        var header = ['CENSUS_ENUMDIST', 'graph_ID',
+        var header = ['CENSUS_ENUMDIST', 'graph_ID', 'group_ID',
                       'CD_ID', 'CENSUS_ID', 
                       'CD_FIRST_NAME', 'CD_LAST_NAME', 'MATCH_ADDR', 'CD_OCCUPATION',
                       'CENSUS_NAMEFRSCLEAN', 'CENSUS_NAMELASTB', 'CENSUS_MATCH_ADDR', 'CENSUS_AGE', 'CENSUS_OCCLABELB',
-                      'confidence_score_x', 'in_cluster', 'spatial_weight', 'selected'];
-        var headerLabs = ['ED', 'graph',
+                      'confidence_score', 'in_cluster', 'spatial_weight', 'selected_algo', 'selected_dist'];
+        var headerLabs = ['ED', 'graph', 'group',
                           'CD', 'CENSUS',
                           'CD FR', 'CD LN', 'CD Add', 'CD Occ',
                           'Cen FN', 'Cen LN', 'Cen Add', 'Age', 'Cen Occ', 
-                          'Confidence', 'Cluster', 'Weight', 'Select'];
+                          'Confidence', 'Cluster', 'Weight', 'Selected', 'True'];
 
         var table = document.createElement("table");
         var tr = table.insertRow(-1);
