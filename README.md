@@ -40,6 +40,7 @@ Similar, but no ED and address data, only ward data in the census.
   - `linkage-disambiguation.ipynb`: outline record linkage approach
   - `linkage_full_run_v1.ipynb`: applies basic algorithm to the whole dataset + initial performance analysis
   - `linkage_eda.ipynb`: applies various iterations of algorithm to the whole dataset + conclusions 
+  - `linkage_eda_v2.ipynb`: applies updated geocodes on best 2 algorithms
 - `/disambiguation` is a python module containing wrapper functions needed in the disambiguation process
   - `init.py` contains a Disambiguator object, when instantiated can be used to run entire disambiguation process, calling functions from below (see `linkage_eda.ipynb` for example on usage)
   - `preprocess.py` contains functions needed before applying disambiguation algorithms

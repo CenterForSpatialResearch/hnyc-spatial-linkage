@@ -12,6 +12,27 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
 L.svg().addTo(map);
 
 // legend
+function plotLegendCircle(legend, r, cx, cy, fill) {
+    legend
+        .append("circle")
+        .attr("r", r)
+        .attr("cx", cx)
+        .attr("cy", cy)
+        .style("fill", fill)
+        .style("opacity", 0.4);
+};
+/*
+function plotLegendCircle(legend, x1, y1, x2, y2, fill) {
+    legend
+        .append("line")
+        .attr("x1", 0)
+        .attr("y1", 70)
+        .attr("x2", 20)
+        .attr("y2", 70)
+        .attr("stroke" , "black")
+        .attr("stroke-width", 3);
+};
+*/
 var legend = d3.select("body")
     .append("svg")
     .attr("id", "legend")
@@ -22,21 +43,8 @@ var legend = d3.select("body")
     .style("z-index", "999")
     .style("transform", "translateX(85vw)");
 
-legend
-    .append("circle")
-    .attr("r", 10)
-    .attr("cx", 10)
-    .attr("cy", 10)
-    .style("fill", "red")
-    .style("opacity", 0.4);
-
-legend
-    .append("circle")
-    .attr("r", 10)
-    .attr("cx", 10)
-    .attr("cy", 40)
-    .style("fill", "blue")
-    .style("opacity", 0.4);
+plotLegendCircle(legend, 10, 10, 10, "red");
+plotLegendCircle(legend, 10, 10, 40, "blue");
 
 legend
     .append("line")
@@ -87,13 +95,6 @@ selED.addEventListener("change", function() {
     plotData(ed, "ED");
 });
 
-/*
-var selGraph = document.getElementById("selectGraph");
-selGraph.addEventListener("change", function() {
-    let graph = document.getElementById("selectGraph").value;
-    plotData(graph, "graph");
-});
-*/
 var inputGraph = document.getElementById("selectGraph");
 inputGraph.addEventListener("keyup", function(event) {
 
@@ -108,9 +109,9 @@ inputGraph.addEventListener("keyup", function(event) {
 function plotData(value, type) {
 
     d3.select("#matches_map").selectAll("svg").attr("pointer-events", "all");
-        
+    
     d3.csv("data/matched_viz_v2.csv", function(data) {
-        
+            
         if (type == "ED"){
             data = data.filter(function(d){return d.CENSUS_ENUMDIST == value;});
         } else if (type == "graph") {
@@ -126,7 +127,7 @@ function plotData(value, type) {
             .selectAll("cd_circles")
             .data(data)
             .enter();
-        
+            
         // cd
         svg.append("circle")
             .attr("id", function(d) { return d.CD_ID })
@@ -134,6 +135,8 @@ function plotData(value, type) {
             .attr("cx", function(d){ return map.latLngToLayerPoint([d.LAT, d.LONG]).x })
             .attr("cy", function(d){ return map.latLngToLayerPoint([d.LAT, d.LONG]).y })
             .attr("r", 20)
+            .attr("visibility", "false")
+            .attr("pointer-events", "visible")
             .style("fill", "#fd8b8b")
             .attr("stroke", false)
             .attr("fill-opacity", .4)
@@ -142,11 +145,8 @@ function plotData(value, type) {
                 d3.selectAll(className)
                     .style("font-weight", "bold");
 
-                var container = document.getElementById("results");
-                var records = container.getElementsByClassName(d.CD_ID);
-                if (records.length > 0) {
-                    container.scrollTop = records[0].offsetTop;
-                }
+                table.row(className).scrollTo();
+
             })
             .on("mouseout", function(d) {
                 var className = "." + d.CD_ID;
@@ -156,7 +156,7 @@ function plotData(value, type) {
             .on("click", function(d) {
                 var className = "." + d.CD_ID;
                 d3.selectAll(className)
-                    .style("background", "#fd8b8b");
+                    .style("background", "#f2f2f2");
             });
 
         // census
@@ -166,6 +166,8 @@ function plotData(value, type) {
             .attr("cx", function(d){ return map.latLngToLayerPoint([d.CENSUS_Y, d.CENSUS_X]).x })
             .attr("cy", function(d){ return map.latLngToLayerPoint([d.CENSUS_Y, d.CENSUS_X]).y })
             .attr("r", 20)
+            .attr("visibility", "false")
+            .attr("pointer-events", "visible")
             .style("fill", "#8ba4fd")
             .attr("stroke", false)
             .attr("fill-opacity", .4)
@@ -174,11 +176,8 @@ function plotData(value, type) {
                 d3.selectAll(className)
                     .style("font-weight", "bold");
 
-                var container = document.getElementById("results");
-                var records = container.getElementsByClassName(d.CENSUS_ID);
-                if (records.length > 0) {
-                    container.scrollTop = records[0].offsetTop;
-                }
+                table.row(className).scrollTo();
+
             })
             .on("mouseout", function(d) {
                 var className = "." + d.CENSUS_ID;
@@ -188,7 +187,7 @@ function plotData(value, type) {
             .on("click", function(d) {
                 var className = "." + d.CENSUS_ID;
                 d3.selectAll(className)
-                    .style("background", "#8ba4fd");
+                    .style("background", "#f2f2f2");
             });
 
         // matches
@@ -199,6 +198,8 @@ function plotData(value, type) {
             .attr("y1", function(d) { return map.latLngToLayerPoint([d.LAT, d.LONG]).y; })
             .attr("x2", function(d) { return map.latLngToLayerPoint([d.CENSUS_Y, d.CENSUS_X]).x; })
             .attr("y2", function(d) { return map.latLngToLayerPoint([d.CENSUS_Y, d.CENSUS_X]).y; })            
+            .attr("visibility", "false")
+            .attr("pointer-events", "visible")
             .attr("stroke", function(d) {
                 if (d.selected_algo == 1) {
                     return "black";
@@ -214,23 +215,14 @@ function plotData(value, type) {
                 }
             })
             .attr("stroke-width", 3)
-            .style("opacity", function(d) {
-                if (d.selected == 1) {
-                    return 1;
-                } else {
-                    return 0.5;
-                }
-            })
+            .style("opacity", 0.5)
             .on("mouseover", function(d) {
                 var className = "." + d.CD_ID + "." + d.CENSUS_ID;
                 d3.selectAll(className)
                     .style("font-weight", "bold");
 
-                var container = document.getElementById("results");
-                var records = document.querySelectorAll(className);
-                if (records.length > 0) {
-                    container.scrollTop = records[0].offsetTop;
-                }
+                table.row(className).scrollTo();
+
             })
             .on("mouseout", function(d) {
                 var className = "." + d.CD_ID + "." + d.CENSUS_ID;
@@ -240,66 +232,109 @@ function plotData(value, type) {
             .on("click", function(d) {
                 var className = "." + d.CD_ID + "." + d.CENSUS_ID;
                 d3.selectAll(className)
-                    .style("background", "#fef3c7");
+                    .style("background", "#fafafa");
             });
+            
+        var tableWidth = document.getElementById("results").offsetWidth;
+        var tableHeight = document.getElementById("results").offsetHeight;
+
+        var table = $('#recordTable').DataTable({
+            destroy: true,
+            data: data,
+            columns: [
+                { "data" : "graph_ID", "title" : "Graph" },
+                { "data" : "group_ID", "title" : "Group" },
+                { "data" : "CENSUS_ENUMDIST", "title" : "ED" },
+                { "data" : "CD_ID", "title" : "CD" },
+                { "data" : "CENSUS_ID", "title" : "CENSUS" },
+                { "data" : "CD_FIRST_NAME", "title" : "CD First Name" },
+                { "data" : "CD_LAST_NAME", "title" : "CD Last Name" },
+                { "data" : "MATCH_ADDR", "title" : "CD Addr" },
+                { "data" : "CD_OCCUPATION", "title" : "CD Occupation" },
+                { "data" : "CENSUS_NAMEFRSCLEAN", "title" : "Cen First Name" },
+                { "data" : "CENSUS_NAMELASTB", "title" : "Cen Last Name" },
+                { "data" : "CENSUS_MATCH_ADDR", "title" : "Cen Addr" },
+                { "data" : "CENSUS_AGE", "title" : "Age" },
+                { "data" : "CENSUS_OCCLABELB", "title" : "Cen Occupation" },
+                { "data" : "confidence_score", "title" : "Confidence Score" },
+                { "data" : "in_cluster", "title" : "Cluster" },
+                { "data" : "spatial_weight", "title" : "Spatial Weight" },
+                { "data" : "selected_algo", "title" : "Selected" },
+                { "data" : "selected_dist", "title" : "True" },
+                { "data" : "dist", "title" : "Distance" }
+            ],
+            initComplete: function () {
+                this.api().columns().every( function () {
+                    var column = this;
+                    var select = $('<input type="text" placeholder="Search" size="3"/>')
+                        .appendTo( $(column.header()) )
+                        .on( 'keyup', function () {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
         
-        // plot table
-        var header = ['CENSUS_ENUMDIST', 'graph_ID', 'group_ID',
-                      'CD_ID', 'CENSUS_ID', 
-                      'CD_FIRST_NAME', 'CD_LAST_NAME', 'MATCH_ADDR', 'CD_OCCUPATION',
-                      'CENSUS_NAMEFRSCLEAN', 'CENSUS_NAMELASTB', 'CENSUS_MATCH_ADDR', 'CENSUS_AGE', 'CENSUS_OCCLABELB',
-                      'confidence_score', 'in_cluster', 'spatial_weight', 'selected_algo', 'selected_dist'];
-        var headerLabs = ['ED', 'graph', 'group',
-                          'CD', 'CENSUS',
-                          'CD FR', 'CD LN', 'CD Add', 'CD Occ',
-                          'Cen FN', 'Cen LN', 'Cen Add', 'Age', 'Cen Occ', 
-                          'Confidence', 'Cluster', 'Weight', 'Selected', 'True'];
+                            column
+                                .search( val )
+                                .draw();
+                        } );
 
-        var table = document.createElement("table");
-        var tr = table.insertRow(-1);
+                } );
+            },
+            "ordering" : false,
+            scrollY: tableHeight * 0.7,
+            scrollX: tableWidth * 0.9,
+            scroller: true,
+            "createdRow": function(row, data, dataIndex) {
+                $(row).addClass(data.CD_ID);
+                $(row).addClass(data.CENSUS_ID);
+            },
+            dom: 'Bfrtip',
+            buttons: [ 'colvis' ]
+        });
 
-        for (var i = 0; i < headerLabs.length; i++) {
-            var th = document.createElement("th");
-            th.innerHTML = headerLabs[i];
-            tr.appendChild(th);
-        }
+        // update location on zoom
+        map.on("moveend", function() {
+            d3.selectAll(".cd")
+                .attr("cx", function(d){ return map.latLngToLayerPoint([d.LAT, d.LONG]).x })
+                .attr("cy", function(d){ return map.latLngToLayerPoint([d.LAT, d.LONG]).y });
 
-        for (var i = 0; i < data.length; i++) {
+            d3.selectAll(".census")
+                .attr("cx", function(d){ return map.latLngToLayerPoint([d.CENSUS_Y, d.CENSUS_X]).x })
+                .attr("cy", function(d){ return map.latLngToLayerPoint([d.CENSUS_Y, d.CENSUS_X]).y });
 
-            tr = table.insertRow(-1);
-            tr.classList.add(data[i]['CD_ID']);
-            tr.classList.add(data[i]['CENSUS_ID']);
-
-            for (var j = 0; j < header.length; j++) {
-                var tabCell = tr.insertCell(-1);
-                tabCell.innerHTML = data[i][header[j]];
-            }
-        }
-
-        var results = document.getElementById("results");
-        results.innerHTML = "";
-        results.appendChild(table);
-        
-    });
-
-    // update location on zoom
-    map.on("moveend", function() {
-        d3.selectAll(".cd")
-            .attr("cx", function(d){ return map.latLngToLayerPoint([d.LAT, d.LONG]).x })
-            .attr("cy", function(d){ return map.latLngToLayerPoint([d.LAT, d.LONG]).y });
-
-        d3.selectAll(".census")
-            .attr("cx", function(d){ return map.latLngToLayerPoint([d.CENSUS_Y, d.CENSUS_X]).x })
-            .attr("cy", function(d){ return map.latLngToLayerPoint([d.CENSUS_Y, d.CENSUS_X]).y });
-
-        d3.selectAll(".match")
-            .attr("x1", function(d) { return map.latLngToLayerPoint([d.LAT, d.LONG]).x; })
-            .attr("y1", function(d) { return map.latLngToLayerPoint([d.LAT, d.LONG]).y; })
-            .attr("x2", function(d) { return map.latLngToLayerPoint([d.CENSUS_Y, d.CENSUS_X]).x; })
-            .attr("y2", function(d) { return map.latLngToLayerPoint([d.CENSUS_Y, d.CENSUS_X]).y; })            
-        
+            d3.selectAll(".match")
+                .attr("x1", function(d) { return map.latLngToLayerPoint([d.LAT, d.LONG]).x; })
+                .attr("y1", function(d) { return map.latLngToLayerPoint([d.LAT, d.LONG]).y; })
+                .attr("x2", function(d) { return map.latLngToLayerPoint([d.CENSUS_Y, d.CENSUS_X]).x; })
+                .attr("y2", function(d) { return map.latLngToLayerPoint([d.CENSUS_Y, d.CENSUS_X]).y; })            
+            
+        });
     });
 };
+
+$("body")
+.on("click", "tr", function() {
+    var cd =  this.classList[0];
+    var census = this.classList[1];
+    this.style.backgroundColor = "#fef3c7";
+
+    d3.selectAll("circle")
+        .attr("visibility", function() {
+            var visibility = d3.select(this).attr("visibility");
+            if (visibility == "visible" ) { return "visible"; } else { return "hidden"; }
+        })
+    d3.selectAll("line").attr("visibility", function() {
+        var visibility = d3.select(this).attr("visibility");
+        if (visibility == "visible" ) { return "visible"; } else { return "hidden"; }
+        })
+
+    d3.select('#' + cd).attr("visibility", "visible");
+    d3.select('#' + census).attr("visibility", "visible")
+    d3.select('#' + cd + census).attr("visibility", "visible");
+    
+})
+.on("mouseover", "tr", function() { this.style.fontWeight = "bold"; })
+.on("mouseout", "tr", function() { this.style.fontWeight = "normal" });
 
 // clear selections
 var clear = document.getElementById("clear");
@@ -310,15 +345,6 @@ clear.addEventListener("click", function() {
         rows[i].style.backgroundColor = "#fff";
     }
 
-});
+    d3.select("svg").selectAll("*").attr("visibility", "visible").attr("pointer-events", "all");
 
-// empty all
-var empty = document.getElementById("empty");
-empty.addEventListener("click", function() {
-    d3.select("svg").selectAll("*").remove();
-
-    document.getElementById("results").innerHTML = "";
-    document.getElementById("selectED").selectedIndex = "none";
-
-    document.getElementById("selectGraph").value = "";
 });
