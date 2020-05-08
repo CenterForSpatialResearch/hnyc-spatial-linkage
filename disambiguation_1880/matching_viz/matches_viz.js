@@ -38,7 +38,7 @@ var legend = d3.select("body")
     .attr("id", "legend")
     .style("position", "absolute")
     .style("width", "15vw")
-    .style("height", "115px")
+    .style("height", "175px")
     .style("background", "rgba(255, 255, 255, 0.9)")
     .style("z-index", "999")
     .style("transform", "translateX(85vw)");
@@ -52,7 +52,8 @@ legend
     .attr("y1", 70)
     .attr("x2", 20)
     .attr("y2", 70)
-    .attr("stroke" , "black")
+    .attr("stroke" , "grey")
+    .attr("stroke-dasharray" , "4")
     .attr("stroke-width", 3);
 
 legend
@@ -61,7 +62,26 @@ legend
     .attr("y1", 100)
     .attr("x2", 20)
     .attr("y2", 100)
-    .attr("stroke" , "grey")
+    .attr("stroke", "black")
+    .attr("stroke-dasharray" , "4")
+    .attr("stroke-width", 3);
+
+legend
+    .append("line")
+    .attr("x1", 0)
+    .attr("y1", 130)
+    .attr("x2", 20)
+    .attr("y2", 130)
+    .attr("stroke", "grey")
+    .attr("stroke-width", 3);
+
+legend
+    .append("line")
+    .attr("x1", 0)
+    .attr("y1", 160)
+    .attr("x2", 20)
+    .attr("y2", 160)
+    .attr("stroke", "black")
     .attr("stroke-width", 3);
 
 legend
@@ -80,13 +100,25 @@ legend
     .append("text")
     .attr("x", 30)
     .attr("y", 75)
-    .text("Disambiguated Match");
+    .text("True Negative");
 
 legend
     .append("text")
     .attr("x", 30)
     .attr("y", 105)
-    .text("ES Match");
+    .text("False Positive");
+
+legend
+    .append("text")
+    .attr("x", 30)
+    .attr("y", 135)
+    .text("False Negative");
+
+legend
+    .append("text")
+    .attr("x", 30)
+    .attr("y", 165)
+    .text("True Positive");
 
 // link to input
 var selED = document.getElementById("selectED");
@@ -110,7 +142,7 @@ function plotData(value, type) {
 
     d3.select("#matches_map").selectAll("svg").attr("pointer-events", "all");
     
-    d3.csv("data/matched_viz_v2.csv", function(data) {
+    d3.csv("data/matched_viz_v3.csv", function(data) {
             
         if (type == "ED"){
             data = data.filter(function(d){return d.CENSUS_ENUMDIST == value;});
@@ -124,6 +156,7 @@ function plotData(value, type) {
 
         var svg = d3.select("#matches_map")
             .select("svg")
+            .attr("id", "mapSVG")
             .selectAll("cd_circles")
             .data(data)
             .enter();
@@ -318,12 +351,12 @@ $("body")
     var census = this.classList[1];
     this.style.backgroundColor = "#fef3c7";
 
-    d3.selectAll("circle")
+    d3.select("#mapSVG").selectAll("circle")
         .attr("visibility", function() {
             var visibility = d3.select(this).attr("visibility");
             if (visibility == "visible" ) { return "visible"; } else { return "hidden"; }
         })
-    d3.selectAll("line").attr("visibility", function() {
+    d3.select("#mapSVG").selectAll("line").attr("visibility", function() {
         var visibility = d3.select(this).attr("visibility");
         if (visibility == "visible" ) { return "visible"; } else { return "hidden"; }
         })
@@ -345,6 +378,6 @@ clear.addEventListener("click", function() {
         rows[i].style.backgroundColor = "#fff";
     }
 
-    d3.select("svg").selectAll("*").attr("visibility", "visible").attr("pointer-events", "all");
+    d3.select("#mapSVG").selectAll("*").attr("visibility", "visible").attr("pointer-events", "all");
 
 });
