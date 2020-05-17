@@ -20,7 +20,6 @@ def apply_algo(sub_groups, i, cluster=True, k_between=True, census_id='CENSUS_ID
     if i < len(sub_groups): # add bottom anchor
         df = pd.concat([df, sub_groups[i+1][0:1]]) 
     
-    print("Working on: " + str(i))
     path_df = dp.create_path_df(df, census_id, confidence)
 
     if cluster:
