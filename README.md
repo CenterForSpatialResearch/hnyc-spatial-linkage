@@ -30,6 +30,8 @@ Similar, but no ED and address data, only ward data in the census.
   - `fall_2019_analysis.md` describes the work done up to fall 2019
   - `/doc`: relevant documentation of the process
   - `/src`: source code for running elastic search on our data
+- `/disambiguation_1850` contains all work related to disambiguation of 1880 data
+  - `disambiguation_1850_v1.ipynb` runs disambiguation process on 1850 ES output
 - `/disambiguation_1880` contains all work related to disambiguation of 1880 data
   - `preprocess.ipynb`: preprocessing of data including generation of metaphones
   - `run_link_records.ipynb`: implemented fuzzy matching using pyspark
@@ -46,3 +48,12 @@ Similar, but no ED and address data, only ward data in the census.
   - `preprocess.py` contains functions needed before applying disambiguation algorithms
   - `linkage.py` contains functions needed for disambiguation
   - `analysis.py` wrapper functions to produce performance metrics
+
+## Data
+Data is available in the HNYC Spatial Linkage Google Drive `data/hnyc/manhattan`
+
+### 1850 `/1850`
+- 1850 disambiguated output `1850_disambiguated.csv`
+
+### 1880
+- matches with confidence score (raw input for 1880 disambiguation processes): `matches.csv`

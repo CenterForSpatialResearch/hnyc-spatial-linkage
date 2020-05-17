@@ -1,2 +1,521 @@
 12:56:54 InsertTime census-1850 515630 307.6624433994293
 01:49:38 InsertTime census-1850 515630 332.4403555393219
+17:54:20 elasticsearch POST http://localhost:9200/_bulk [status:N/A request:4.069s]
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 159, in _new_conn
+    (self._dns_host, self.port), self.timeout, **extra_kw)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\connection.py", line 80, in create_connection
+    raise err
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\connection.py", line 70, in create_connection
+    sock.connect(sa)
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\elasticsearch\connection\http_urllib3.py", line 242, in perform_request
+    method, url, body, retries=Retry(False), headers=request_headers, **kw
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 638, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\retry.py", line 344, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\packages\six.py", line 686, in reraise
+    raise value
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 600, in urlopen
+    chunked=chunked)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 354, in _make_request
+    conn.request(method, url, **httplib_request_kw)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1229, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1275, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1224, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1016, in _send_output
+    self.send(msg)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 956, in send
+    self.connect()
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 181, in connect
+    conn = self._new_conn()
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 168, in _new_conn
+    self, "Failed to establish a new connection: %s" % e)
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPConnection object at 0x0000021D9DE1E400>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it
+17:54:25 elasticsearch POST http://localhost:9200/_bulk [status:N/A request:4.024s]
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 159, in _new_conn
+    (self._dns_host, self.port), self.timeout, **extra_kw)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\connection.py", line 80, in create_connection
+    raise err
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\connection.py", line 70, in create_connection
+    sock.connect(sa)
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\elasticsearch\connection\http_urllib3.py", line 242, in perform_request
+    method, url, body, retries=Retry(False), headers=request_headers, **kw
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 638, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\retry.py", line 344, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\packages\six.py", line 686, in reraise
+    raise value
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 600, in urlopen
+    chunked=chunked)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 354, in _make_request
+    conn.request(method, url, **httplib_request_kw)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1229, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1275, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1224, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1016, in _send_output
+    self.send(msg)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 956, in send
+    self.connect()
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 181, in connect
+    conn = self._new_conn()
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 168, in _new_conn
+    self, "Failed to establish a new connection: %s" % e)
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPConnection object at 0x0000021D9DE1E4A8>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it
+17:54:29 elasticsearch POST http://localhost:9200/_bulk [status:N/A request:4.026s]
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 159, in _new_conn
+    (self._dns_host, self.port), self.timeout, **extra_kw)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\connection.py", line 80, in create_connection
+    raise err
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\connection.py", line 70, in create_connection
+    sock.connect(sa)
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\elasticsearch\connection\http_urllib3.py", line 242, in perform_request
+    method, url, body, retries=Retry(False), headers=request_headers, **kw
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 638, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\retry.py", line 344, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\packages\six.py", line 686, in reraise
+    raise value
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 600, in urlopen
+    chunked=chunked)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 354, in _make_request
+    conn.request(method, url, **httplib_request_kw)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1229, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1275, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1224, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1016, in _send_output
+    self.send(msg)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 956, in send
+    self.connect()
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 181, in connect
+    conn = self._new_conn()
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 168, in _new_conn
+    self, "Failed to establish a new connection: %s" % e)
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPConnection object at 0x0000021D9DE1E588>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it
+17:54:33 elasticsearch POST http://localhost:9200/_bulk [status:N/A request:4.011s]
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 159, in _new_conn
+    (self._dns_host, self.port), self.timeout, **extra_kw)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\connection.py", line 80, in create_connection
+    raise err
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\connection.py", line 70, in create_connection
+    sock.connect(sa)
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\elasticsearch\connection\http_urllib3.py", line 242, in perform_request
+    method, url, body, retries=Retry(False), headers=request_headers, **kw
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 638, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\retry.py", line 344, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\packages\six.py", line 686, in reraise
+    raise value
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 600, in urlopen
+    chunked=chunked)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 354, in _make_request
+    conn.request(method, url, **httplib_request_kw)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1229, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1275, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1224, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1016, in _send_output
+    self.send(msg)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 956, in send
+    self.connect()
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 181, in connect
+    conn = self._new_conn()
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 168, in _new_conn
+    self, "Failed to establish a new connection: %s" % e)
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPConnection object at 0x0000021DD56762E8>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it
+18:09:07 elasticsearch POST http://localhost:9200/_bulk [status:N/A request:4.443s]
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 159, in _new_conn
+    (self._dns_host, self.port), self.timeout, **extra_kw)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\connection.py", line 80, in create_connection
+    raise err
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\connection.py", line 70, in create_connection
+    sock.connect(sa)
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\elasticsearch\connection\http_urllib3.py", line 242, in perform_request
+    method, url, body, retries=Retry(False), headers=request_headers, **kw
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 638, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\retry.py", line 344, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\packages\six.py", line 686, in reraise
+    raise value
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 600, in urlopen
+    chunked=chunked)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 354, in _make_request
+    conn.request(method, url, **httplib_request_kw)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1229, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1275, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1224, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1016, in _send_output
+    self.send(msg)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 956, in send
+    self.connect()
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 181, in connect
+    conn = self._new_conn()
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 168, in _new_conn
+    self, "Failed to establish a new connection: %s" % e)
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPConnection object at 0x000001BB79D7E3C8>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it
+18:09:11 elasticsearch POST http://localhost:9200/_bulk [status:N/A request:4.010s]
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 159, in _new_conn
+    (self._dns_host, self.port), self.timeout, **extra_kw)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\connection.py", line 80, in create_connection
+    raise err
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\connection.py", line 70, in create_connection
+    sock.connect(sa)
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\elasticsearch\connection\http_urllib3.py", line 242, in perform_request
+    method, url, body, retries=Retry(False), headers=request_headers, **kw
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 638, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\retry.py", line 344, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\packages\six.py", line 686, in reraise
+    raise value
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 600, in urlopen
+    chunked=chunked)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 354, in _make_request
+    conn.request(method, url, **httplib_request_kw)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1229, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1275, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1224, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1016, in _send_output
+    self.send(msg)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 956, in send
+    self.connect()
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 181, in connect
+    conn = self._new_conn()
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 168, in _new_conn
+    self, "Failed to establish a new connection: %s" % e)
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPConnection object at 0x000001BB79D7E438>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it
+18:09:15 elasticsearch POST http://localhost:9200/_bulk [status:N/A request:4.022s]
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 159, in _new_conn
+    (self._dns_host, self.port), self.timeout, **extra_kw)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\connection.py", line 80, in create_connection
+    raise err
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\connection.py", line 70, in create_connection
+    sock.connect(sa)
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\elasticsearch\connection\http_urllib3.py", line 242, in perform_request
+    method, url, body, retries=Retry(False), headers=request_headers, **kw
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 638, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\retry.py", line 344, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\packages\six.py", line 686, in reraise
+    raise value
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 600, in urlopen
+    chunked=chunked)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 354, in _make_request
+    conn.request(method, url, **httplib_request_kw)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1229, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1275, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1224, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1016, in _send_output
+    self.send(msg)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 956, in send
+    self.connect()
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 181, in connect
+    conn = self._new_conn()
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 168, in _new_conn
+    self, "Failed to establish a new connection: %s" % e)
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPConnection object at 0x000001BB79D7E588>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it
+18:09:19 elasticsearch POST http://localhost:9200/_bulk [status:N/A request:4.014s]
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 159, in _new_conn
+    (self._dns_host, self.port), self.timeout, **extra_kw)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\connection.py", line 80, in create_connection
+    raise err
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\connection.py", line 70, in create_connection
+    sock.connect(sa)
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\elasticsearch\connection\http_urllib3.py", line 242, in perform_request
+    method, url, body, retries=Retry(False), headers=request_headers, **kw
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 638, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\retry.py", line 344, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\packages\six.py", line 686, in reraise
+    raise value
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 600, in urlopen
+    chunked=chunked)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 354, in _make_request
+    conn.request(method, url, **httplib_request_kw)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1229, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1275, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1224, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1016, in _send_output
+    self.send(msg)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 956, in send
+    self.connect()
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 181, in connect
+    conn = self._new_conn()
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 168, in _new_conn
+    self, "Failed to establish a new connection: %s" % e)
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPConnection object at 0x000001BB35F862E8>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it
+19:28:31 elasticsearch POST http://localhost:9200/_bulk [status:N/A request:10.209s]
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 384, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 2, in raise_from
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 380, in _make_request
+    httplib_response = conn.getresponse()
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1321, in getresponse
+    response.begin()
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 296, in begin
+    version, status, reason = self._read_status()
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 257, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "C:\Users\jolen\Anaconda3\lib\socket.py", line 589, in readinto
+    return self._sock.recv_into(b)
+socket.timeout: timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\elasticsearch\connection\http_urllib3.py", line 242, in perform_request
+    method, url, body, retries=Retry(False), headers=request_headers, **kw
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 638, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\retry.py", line 344, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\packages\six.py", line 686, in reraise
+    raise value
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 600, in urlopen
+    chunked=chunked)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 386, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 306, in _raise_timeout
+    raise ReadTimeoutError(self, url, "Read timed out. (read timeout=%s)" % timeout_value)
+urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=9200): Read timed out. (read timeout=10)
+20:34:44 elasticsearch POST http://localhost:9200/_bulk [status:N/A request:4.052s]
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 157, in _new_conn
+    (self._dns_host, self.port), self.timeout, **extra_kw
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\connection.py", line 84, in create_connection
+    raise err
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\connection.py", line 74, in create_connection
+    sock.connect(sa)
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\elasticsearch\connection\http_urllib3.py", line 238, in perform_request
+    method, url, body, retries=Retry(False), headers=request_headers, **kw
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 720, in urlopen
+    method, url, error=e, _pool=self, _stacktrace=sys.exc_info()[2]
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\retry.py", line 376, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\packages\six.py", line 735, in reraise
+    raise value
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 672, in urlopen
+    chunked=chunked,
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 387, in _make_request
+    conn.request(method, url, **httplib_request_kw)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1229, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1275, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1224, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1016, in _send_output
+    self.send(msg)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 956, in send
+    self.connect()
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 184, in connect
+    conn = self._new_conn()
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 169, in _new_conn
+    self, "Failed to establish a new connection: %s" % e
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPConnection object at 0x000002157E63EA58>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it
+20:34:49 elasticsearch POST http://localhost:9200/_bulk [status:N/A request:4.039s]
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 157, in _new_conn
+    (self._dns_host, self.port), self.timeout, **extra_kw
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\connection.py", line 84, in create_connection
+    raise err
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\connection.py", line 74, in create_connection
+    sock.connect(sa)
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\elasticsearch\connection\http_urllib3.py", line 238, in perform_request
+    method, url, body, retries=Retry(False), headers=request_headers, **kw
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 720, in urlopen
+    method, url, error=e, _pool=self, _stacktrace=sys.exc_info()[2]
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\retry.py", line 376, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\packages\six.py", line 735, in reraise
+    raise value
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 672, in urlopen
+    chunked=chunked,
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 387, in _make_request
+    conn.request(method, url, **httplib_request_kw)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1229, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1275, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1224, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1016, in _send_output
+    self.send(msg)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 956, in send
+    self.connect()
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 184, in connect
+    conn = self._new_conn()
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 169, in _new_conn
+    self, "Failed to establish a new connection: %s" % e
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPConnection object at 0x000002157E63EBE0>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it
+20:34:53 elasticsearch POST http://localhost:9200/_bulk [status:N/A request:4.019s]
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 157, in _new_conn
+    (self._dns_host, self.port), self.timeout, **extra_kw
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\connection.py", line 84, in create_connection
+    raise err
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\connection.py", line 74, in create_connection
+    sock.connect(sa)
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\elasticsearch\connection\http_urllib3.py", line 238, in perform_request
+    method, url, body, retries=Retry(False), headers=request_headers, **kw
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 720, in urlopen
+    method, url, error=e, _pool=self, _stacktrace=sys.exc_info()[2]
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\retry.py", line 376, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\packages\six.py", line 735, in reraise
+    raise value
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 672, in urlopen
+    chunked=chunked,
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 387, in _make_request
+    conn.request(method, url, **httplib_request_kw)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1229, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1275, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1224, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1016, in _send_output
+    self.send(msg)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 956, in send
+    self.connect()
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 184, in connect
+    conn = self._new_conn()
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 169, in _new_conn
+    self, "Failed to establish a new connection: %s" % e
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPConnection object at 0x000002157E63EEF0>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it
+20:34:57 elasticsearch POST http://localhost:9200/_bulk [status:N/A request:4.022s]
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 157, in _new_conn
+    (self._dns_host, self.port), self.timeout, **extra_kw
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\connection.py", line 84, in create_connection
+    raise err
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\connection.py", line 74, in create_connection
+    sock.connect(sa)
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\elasticsearch\connection\http_urllib3.py", line 238, in perform_request
+    method, url, body, retries=Retry(False), headers=request_headers, **kw
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 720, in urlopen
+    method, url, error=e, _pool=self, _stacktrace=sys.exc_info()[2]
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\util\retry.py", line 376, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\packages\six.py", line 735, in reraise
+    raise value
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 672, in urlopen
+    chunked=chunked,
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connectionpool.py", line 387, in _make_request
+    conn.request(method, url, **httplib_request_kw)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1229, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1275, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1224, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 1016, in _send_output
+    self.send(msg)
+  File "C:\Users\jolen\Anaconda3\lib\http\client.py", line 956, in send
+    self.connect()
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 184, in connect
+    conn = self._new_conn()
+  File "C:\Users\jolen\Anaconda3\lib\site-packages\urllib3\connection.py", line 169, in _new_conn
+    self, "Failed to establish a new connection: %s" % e
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPConnection object at 0x0000021586387F28>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it
+21:00:22 InsertTime census-1880-full 1147.425565481186
+23:09:23 InsertTime census-1880-full 1773.953724861145
+02:07:42 InsertTime census-1880-full 905.6211371421814
+04:27:51 InsertTime census-1880-full 1958.7120366096497

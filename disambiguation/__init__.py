@@ -1,17 +1,20 @@
 import pandas as pd
+import numpy as np
 import disambiguation.processing as dp
 import disambiguation.linkage as dl
 import disambiguation.analysis as da
 
 class Disambiguator:
 
-    def __init__(self, match_df, cd_id="CD_ID", census_id="CENSUS_ID", confidence="confidence_score", lon="LONG", lat="LAT"):
+    def __init__(self, match_df, cd_id="CD_ID", census_id="CENSUS_ID", confidence="confidence_score", census_count='census_count', lon="LONG", lat="LAT", sort_var="CENSUS_ID"):
         # initialize input 
         self.input = match_df
 
         # initialize col names
+        self.sort_var = sort_var
         self.cd_id = cd_id
         self.census_id = census_id
+        self.cen_count = census_count
         self.confidence = confidence
         self.lon = lon
         self.lat = lat
@@ -24,43 +27,19 @@ class Disambiguator:
         print("Running")
 
         print("Creating dictionary of sub dfs (1/4)...")
-        sub_group_dict = dp.create_subdict(self.input, self.confidence)
-        sub_group_algos = [i for i in range(0, len(sub_group_dict) - 1) if sum(sub_group_dict[i].census_count > 1) > 0]
+        sub_groups = dp.split_dfs(self.input, self.sort_var, self.confidence)
 
         print("Applying algorithms iteratively (2/4)...")
         # iteratively apply algorithms onto each sub df
-        for i in sub_group_algos:
-            
-            # save df and wrangle to necessary format
-            df = sub_group_dict[i]
-            path_df = dp.create_path_df(df, self.census_id, self.confidence)
+        sub_groups = [dl.apply_algo(sub_groups, i, cluster=cluster, census_id=self.census_id, confidence=self.confidence, lat=self.lat, lon=self.lon, k_between=k_between, cluster_kwargs=cluster_kwargs, path_kwargs=path_kwargs) for i in range(0, len(sub_groups))]
 
-            if cluster:
-                # apply density clustering and remove outlier nodes
-                path_df = dl.apply_density_clustering(path_df, self.lat, self.lon, **cluster_kwargs)
-                cluster_arg = 'in_cluster_x'
-
-            else:
-                cluster_arg = None
-
-            # create graph and k shortest paths centrality
-            g = dp.create_path_graph(path_df, cluster_col=cluster_arg)
-
-            if k_between:
-                output = dl.apply_k_betweenness(path_df, g, **path_kwargs)
-            else:
-                output = dl.apply_shortest_path(path_df, g, **path_kwargs)
-
-            sub_group_dict[i] = output
-        
         print("Cleaning output (3/4)...")
-        sub_grp_list = [v for k,v in sub_group_dict.items()]
-        final = pd.concat(sub_grp_list)
+        final = pd.concat(sub_groups)
 
         final = final.drop_duplicates([self.cd_id, self.census_id])
 
         final['anchor'] = final['anchor'].fillna(0)
-        final['spatial_weight'] = final.apply(lambda row: row[self.confidence] + 1 if pd.isna(row.spatial_weight) else row.spatial_weight, axis=1)
+        final['spatial_weight'] = np.where(final['spatial_weight'].isnull(), final[self.confidence] + 1, final['spatial_weight']) # conf + 1 when weight is null - these are the rows that had did not req. spatial disambiguation, hence would def. be in shortest path
 
         print("Disambiguating (4/4)...")
         disambiguated = dl.get_matches(final)

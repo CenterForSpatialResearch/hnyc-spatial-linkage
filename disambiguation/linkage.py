@@ -1,6 +1,45 @@
 import pandas as pd
 import networkx as nx
 import hdbscan
+from itertools import islice
+import disambiguation.processing as dp
+
+"""
+Wrapper function for everything below, including checks
+Designed to work within list comprehension only! (refer to Disambiguator())
+Works by applying algorithm to specified df (using index i) in the list
+sub_groups: list of dfs, each df being a subset of the census bounded by 2 anchors
+i: index of df in the list
+"""
+def apply_algo(sub_groups, i, cluster=True, k_between=True, census_id='CENSUS_ID', census_count="census_count", confidence='confidence_score', lat="LAT", lon="LON", cluster_kwargs={}, path_kwargs={}):
+
+    df = sub_groups[i]
+    if sum(df[census_count] > 1) == 0: # no disambiguation needed
+        return df
+
+    if i < len(sub_groups): # add bottom anchor
+        df = pd.concat([df, sub_groups[i+1][0:1]]) 
+    
+    print("Working on: " + str(i))
+    path_df = dp.create_path_df(df, census_id, confidence)
+
+    if cluster:
+        # apply density clustering and remove outlier nodes
+        path_df = apply_density_clustering(path_df, lat, lon, **cluster_kwargs)
+        cluster_arg = 'in_cluster_x'
+
+    else:
+        cluster_arg = None
+
+    # create graph and k shortest paths centrality
+    g = dp.create_path_graph(path_df, cluster_col=cluster_arg, lat=lat, lon=lon)
+
+    if k_between:
+        output = apply_k_betweenness(path_df, g, **path_kwargs)
+    else:
+        output = apply_shortest_path(path_df, g, **path_kwargs)
+
+    return output
 
 """
 Apply Dijkstra's algorithm to the graph and get spatial weights
@@ -40,15 +79,18 @@ def apply_k_betweenness(df, graph, source=None, target=None, k=None, scale=1):
     if target == None:
         target = list(df["node_ID"])[-1]
 
-    k_paths = list(nx.shortest_simple_paths(graph, source, target, weight="weight"))
-    length = len(k_paths)
+    k_paths = nx.shortest_simple_paths(graph, source, target, weight="weight")
 
-    if k == None:    
+    length = get_n_paths(df)
+    if k == None:
         if length < 31:
             k = 1
+        elif length > 50:
+            k = 50
         else:
             k = int(0.5 * length)
-    k_paths = k_paths[0:k]
+
+    k_paths = list(islice(k_paths, k))
 
     # initialize output: dict with nodes as keys
     spatial_weights = dict.fromkeys(graph.nodes, 0)
@@ -64,6 +106,17 @@ def apply_k_betweenness(df, graph, source=None, target=None, k=None, scale=1):
     df['spatial_weight'] = df['spatial_weight'] + df['confidence_score']
 
     return df
+
+"""
+Helper method to count the number of possible paths in the graph
+"""
+def get_n_paths(df):
+    k = 1
+    counts = df.groupby('letter')['letter'].size().to_list()
+    for count in counts:
+        k *= count
+    
+    return k
 
 """
 Apply density based clustering to detect outliers. Requires `hdbscan` library

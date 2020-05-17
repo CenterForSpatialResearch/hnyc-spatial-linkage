@@ -11,7 +11,6 @@ with open('../doc/config_1880.json') as json_data_file:
 
 
 es = Elasticsearch('localhost:9200')
-
 logging.basicConfig(filename='../doc/direct_match.log',
                             filemode='a',
                             format='%(created)f %(asctime)s %(name)s %(message)s',
@@ -35,11 +34,11 @@ def get_matches():
             row = row.replace(np.nan,'',regex=True) #covnert nan to empty string
             data = row.to_dict()
         
-            first_name_metaphone = [i for i in doublemetaphone(data["CD_FIRST_NAME"]) if i]
-            last_name_metaphone = [i for i in doublemetaphone(data["CD_LAST_NAME"]) if i]
-            
             data["CD_FIRST_NAME"] = name_clean(data["CD_FIRST_NAME"])
             data["CD_LAST_NAME"] = name_clean(data["CD_LAST_NAME"])
+            
+            first_name_metaphone = [i for i in doublemetaphone(data["CD_FIRST_NAME"]) if i]
+            last_name_metaphone = [i for i in doublemetaphone(data["CD_LAST_NAME"]) if i]
 
             if config['edit_distance'] !=0:
                 if config['metaphone'] is 1:
@@ -63,8 +62,8 @@ def get_matches():
 
             if config['edit_distance'] is 0:
                 if config['metaphone'] is 1:
-                    query =  { "bool" : { "must" : [{ "match": { "CENSUS_NAMEFRSTB": data["CD_FIRST_NAME"] } },
-                            { "match": { "CENSUS_NAMELASTB": data["CD_LAST_NAME"] } },
+                    query =  { "bool" : { "must" : [ #{ "match": { "CENSUS_NAMEFRSTB": data["CD_FIRST_NAME"] } },
+                          #  { "match": { "CENSUS_NAMELASTB": data["CD_LAST_NAME"] } },
                             { "match" : { "WARD_NUM": data["WARD_NUM"]} },
                             { "match" : { "CENSUS_ENUMDIST": data["CD_ED"]} },
                             {"terms": {"METAPHONE_NAMELAST.keyword": last_name_metaphone}},
@@ -103,14 +102,14 @@ def get_matches():
                 count_unmatch+=1
             
 
-    logging.warn("Total city directory matched: "+ str(count_match))
-    logging.warn("Total city directory unmatched: "+ str(count_unmatch))
+    logging.warning("Total city directory matched: "+ str(count_match))
+    logging.warning("Total city directory unmatched: "+ str(count_unmatch))
 
 def name_clean(name):
   return max(name.split(' '), key=len)
 
 def export_data(data):
-    json.dump(data, open('../data/matched_data.json','w'))
+    json.dump(data, open('../../data/matched_data.json','w'))
 
 if __name__=='__main__':
     get_matches()

@@ -8,7 +8,7 @@ from metaphone import doublemetaphone
 
 es = Elasticsearch('localhost:9200')
 
-logging.basicConfig(filename='../doc/bulk_insert.log',
+logging.basicConfig(filename="../doc/bulk_insert.log",
                             filemode='a',
                             format='%(asctime)s %(name)s %(message)s',
                             datefmt='%H:%M:%S',
@@ -63,7 +63,7 @@ def name_clean(name):
 if __name__=='__main__':
     if __name__ == '__main__':
       parser = ArgumentParser()
-      parser.add_argument("-config", help="config file path", default="../data/census1880_sample_LES_v04.csv")
+      parser.add_argument("-config", help="config file path", default="../doc/config_1880.json")
 
       args = parser.parse_args()
 
@@ -310,6 +310,24 @@ PUT census
             "keyword" : {
               "type" : "keyword",
               "ignore_above" : 256
+            }
+          }
+        },
+        "METAPHONE_NAMEFIRST": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+            }
+          }
+        },
+        "METAPHONE_NAMELAST": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
             }
           }
         },

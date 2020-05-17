@@ -1,17 +1,49 @@
 import pandas as pd
 import networkx as nx
 import numpy as np
+from pyjarowinkler import distance
+from haversine import haversine, Unit
 
 """
-Create a dictionary, with keys as group ID and values as a dataframe bounded by anchors
+Applies confidence score to df
+"""
+
+def apply_confidence_score(df, cd_fn = "CD_FIRST_NAME", cen_fn = "CENSUS_NAMEFRSTB", cd_ln = "CD_LAST_NAME", cen_ln = "CENSUS_NAMELASTB", cen_occ = "CENSUS_OCCLABELB", cen_age = "CENSUS_AGE", cd_id="OBJECTID", cen_id="OBJECTID.x"):
+    
+    # name jw dist
+    df["jw_fn"] = df.apply(lambda x: distance.get_jaro_distance(x[cd_fn], x[cen_fn], winkler=True, scaling=0.1), axis = 1)
+    df["jw_ln"] = df.apply(lambda x: distance.get_jaro_distance(x[cd_ln], x[cen_ln], winkler=True, scaling=0.1), axis = 1)
+    df["jw_score"] = 0.4 * df["jw_fn"] + 0.6 * df["jw_ln"]
+
+    # occ
+    df['occ_listed'] = np.where((df[cen_occ].isnull()) | (df[cen_occ] == '*'), 0, 1)
+
+    # age
+    df['age_score'] = np.where(df[cen_age] <= 12, 0, 1)
+
+    # cd conflicts
+    df["cd_count"] = df.groupby(cd_id)[cen_id].transform('count')
+    df["census_count"] = df.groupby(cen_id)[cd_id].transform('count')
+
+    df['confidence_score'] = .5*df.jw_score + .2*(1/df.cd_count) + \
+                             .2*(1/df.census_count) + .05*df.occ_listed + \
+                             .05*df.age_score
+    df['confidence_score'] = df['confidence_score'].round(decimals = 2)    
+
+    return df
+
+"""
+Create a list of dataframes where the top row is an anchor
 Each dataframe is one where spatial disambiguation will be applied
 This is necessary as else, algorithms take too long to run
 Match: df of matches
 confidence_score: name of confidence score column
 """
 
-def create_subdict(match, confidence="confidence_score"):
-    
+def split_dfs(match, sort_var="CENSUS_ID", confidence="confidence_score"):
+
+    match = match.sort_values(by=[sort_var])
+
     # identify anchors and assign anchor ID
     match['anchor'] = np.where(match[confidence] == 1, 1, None)
     sub_group = pd.DataFrame({'index': list(match.loc[match.anchor.notnull(), :].index), 'group_ID': range(0, sum(match['anchor'].notnull()))}).set_index('index')
@@ -19,13 +51,16 @@ def create_subdict(match, confidence="confidence_score"):
     match['group_ID'] = match['group_ID'].fillna(method='ffill').fillna(method='backfill')
 
     # split df into multiple df, each bounded by anchor
-    sub_group_dict = {group: df for group, df in match.groupby('group_ID')}
 
+    # sub_group_dict = {group: df for group, df in match.groupby('group_ID')}
+    sub_groups = [df for group, df in match.groupby('group_ID')]
+    
     # add bottom anchor back
+    """
     for i in range(0, len(sub_group_dict) - 1):
         sub_group_dict[i] = pd.concat([sub_group_dict[i], sub_group_dict[i+1][0:1]])
-
-    return sub_group_dict
+    """
+    return sub_groups
 
 """
 Create node ID for each match, to be using the shortest path algorithm 
@@ -55,19 +90,19 @@ def create_path_df(sub_graph, census_id = "CENSUS_ID", confidence = "confidence_
 Creates a graph from the sub_graph dataframe
 Each node being a potential CD-census match and 
     each edge being the link between the potential CD records of consecutive census records
-The weight of each edge = the manhattan distance between the two
+The weight of each edge = the haversine distance between the two
 cluster_col: name of column with cluster group. If does not exist, use None
 Returns the graph object
 """
 
-def create_path_graph(g, cluster_col='in_cluster_x'):
+def create_path_graph(g, cluster_col='in_cluster_x', lat='LAT', lon='LONG'):
     g.loc[:, 'key'] = 0
     g = g.merge(g, on='key')
     g['key'] = g.apply(lambda row: 1 if int(row.letter_x[1:]) - int(row.letter_y[1:]) == -1 else 0, axis = 1)
     g = g[g.key == 1]
 
-    g['weight'] = g.apply(lambda row: ((row.LONG_y - row.LONG_x)**2 + (row.LAT_y - row.LONG_x)**2)**(1/2), axis=1)
-
+    g['weight'] = g.apply(lambda row: haversine((row[lat + '_y'], row[lon + '_y']), (row[lat + '_x'], row[lon + '_x']), unit=Unit.METERS), axis=1)
+    
     if cluster_col != None:
         g['weight'] = g.apply(lambda row: row.weight + 999 if row[cluster_col] == -1 else row.weight, axis=1)
     
