@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import disambiguation.processing as dp
-import disambiguation.linkage as dl
+import disambiguation.disambiguation as dl
 import disambiguation.analysis as da
 
 class Disambiguator:
