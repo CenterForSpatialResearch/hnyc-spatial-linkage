@@ -30,6 +30,7 @@ class Disambiguator:
         sub_groups = dp.split_dfs(self.input, self.sort_var, self.confidence)
 
         print("Applying algorithms iteratively (2/4)...")
+        print("Number of Subgraphs: " + str(len(sub_groups)))
         # iteratively apply algorithms onto each sub df
         sub_groups = [dl.apply_algo(sub_groups, i, cluster=cluster, census_id=self.census_id, confidence=self.confidence, lat=self.lat, lon=self.lon, k_between=k_between, cluster_kwargs=cluster_kwargs, path_kwargs=path_kwargs) for i in range(0, len(sub_groups))]
 
