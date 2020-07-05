@@ -1,6 +1,6 @@
 from haversine import haversine, Unit
 from numpy import log
-import disambiguation.linkage as dl
+import disambiguation.disambiguation as dl
 
 """
 Get number of selected matches, out of total possible (ie unique CD records)

@@ -33,6 +33,44 @@ def apply_confidence_score(df, cd_fn = "CD_FIRST_NAME", cen_fn = "CENSUS_NAMEFRS
     return df
 
 """
+Takes elastic search and census directory geocode file to create a dataframe 
+ready for the disambiguation process.
+Can add/incorporate new columns to include in confidence score here
+elastic_search: either df with elastic search output or elastic search output file
+city_directory: either df with city directory data or file name
+file: boolean value, set to True if elastic_search/city_directory are file names otherwise set 
+to false. Default false 
+"""
+
+def elastic_to_disamb(elastic_search, city_directory, file = False):
+
+    if file:
+        elastic_search = pd.read_csv(elastic_search, sep='\t', engine='python')
+        city_directory = pd.read_csv(city_directory)
+
+    else:
+        elastic_search = elastic_search.copy()
+        city_directory = city_directory.copy()
+
+    latlng = city_directory[['OBJECTID', 'LONG', 'LAT']]
+
+    match = apply_confidence_score(elastic_search, cen_fn='CENSUS_NAMEFRSTB', cen_ln='CENSUS_NAMELASTB',
+                                      cen_occ='CENSUS_OCCLABELB', cen_id='OBJECTID.x')
+
+    match['CD_ID'] = 'CD_' + match['OBJECTID'].astype(str)
+    match['CENSUS_ID'] = 'CENSUS_' + match['OBJECTID.x'].astype(str)
+
+    #Can remove this after finalizing the confidence score
+    match['census_count_inverse'] = 1 / match['census_count']
+    match['cd_count_inverse'] = 1 / match['cd_count']
+
+    match = match.merge(latlng, how='left', on='OBJECTID', validate='many_to_one')
+
+    return match
+
+
+
+"""
 Create a list of dataframes where the top row is an anchor
 Each dataframe is one where spatial disambiguation will be applied
 This is necessary as else, algorithms take too long to run

@@ -146,7 +146,7 @@ def get_matches(df, cd_id = 'CD_ID', census_id = 'CENSUS_ID', weight = 'spatial_
     b.add_weighted_edges_from(b_edges)
 
     # algorithm is too expensive if we perform it on entire graph. moreover, graph is actually disconnected into sub_graphs. apply algorithm on subgraphs instead
-    subgraphs = list(nx.connected_component_subgraphs(b))
+    subgraphs = [b.subgraph(c) for c in nx.connected_components(b)]
     matches = [list(nx.max_weight_matching(graph, maxcardinality = True)) for graph in subgraphs]
     matches = [sorted(list(item)) for sublist in matches for item in sublist] # unnest and convert pairs from tuple to list
     matches = pd.DataFrame(matches, columns=[cd_id, census_id])
