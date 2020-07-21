@@ -35,7 +35,7 @@ class Benchmark():
     def set_confidence(self, confidence):
         self.confidence = confidence
         # Need to figure out what's going on here
-        self.benchmark['confidence_score'] = self.benchmark[self.confidence] + self.benchmark['add_match']
+        self.benchmark['confidence_score'] = self.benchmark['add_match'] #+ self.benchmark[self.confidence]
 
     def create_benchmark(self):
 
