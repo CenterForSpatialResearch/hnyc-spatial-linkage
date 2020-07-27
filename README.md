@@ -37,7 +37,7 @@ Similar, but no ED and address data, only ward data in the census.
 - `/disambiguation_1850` contains all work related to disambiguation of 1880 data
   - `disambiguation_1850_v1.ipynb` runs disambiguation process on 1850 ES output
 - `/disambiguation_1880` contains all work related to disambiguation of 1880 data
-  - 'Confidence_Score_Tuning.ipynb': Documents confidence score tuning process
+  - `Confidence_Score_Tuning.ipynb`: Documents confidence score tuning process
   - `/_archived`: archived scripts
     - `/confidence_score`
       - `preprocess.ipynb`: preprocessing of data including generation of metaphones
@@ -52,19 +52,19 @@ Similar, but no ED and address data, only ward data in the census.
   - `run_link_records.ipynb`: implemented record matching using pyspark
   - `confidence_score_latlng.ipynb`: adding of census conflicts to confidence score, merging of lat lng data (contains most updated confidence score formula)
   - `linkage_full_run_SPRING_LATEST.ipynb`: informed by linkage EDA (see archive), generates latest disambiguated output from ES matching (with metaphone issue fixed)
--'/Interpolation'   
-   -'1880_1850_for_Interpolation.ipynb': Explores 1880 and 1850 census datasets
-   - 'Dwelling Addresses.ipynb': Documents different methods for filling in addresses at dwelling level for 1850
-   - 'Feature_Exploration.ipynb': Explores some of the columns in 1880 and 1850 datasets in order to determine what they represents and if they can be used for modelling
-   - 'Interpolation Pilots.ipynb': Working notebook for starting explorations of options for interpolation (often moved into a separate notebook when they seem worth looking at in more depth)
-   - 'Linear_Model.ipynb': Creates and tests linear models for house number interpolation
+- `/Interpolation`   
+   - `1880_1850_for_Interpolation.ipynb`: Explores 1880 and 1850 census datasets
+   - `Dwelling Addresses.ipynb`: Documents different methods for filling in addresses at dwelling level for 1850
+   - `Feature_Exploration.ipynb`: Explores some of the columns in 1880 and 1850 datasets in order to determine what they represents and if they can be used for modelling
+   - `Interpolation Pilots.ipynb`: Working notebook for starting explorations of options for interpolation (often moved into a separate notebook when they seem worth looking at in more depth)
+   - `Linear_Model.ipynb`: Creates and tests linear models for house number interpolation
 - `/disambiguation` is a python module containing wrapper functions needed in the disambiguation process
   - `init.py` contains a Disambiguator object, when instantiated can be used to run entire disambiguation process, calling functions from below (see `linkage_eda.ipynb` for example on usage)
   - `preprocess.py` contains functions needed before applying disambiguation algorithms, including confidence score generation
   - `disambiguation.py` contains functions needed for disambiguation
   - `analysis.py` wrapper functions to produce performance metrics
-  - 'confidence_score_tuning.py' contains functions needed for the confidence tuning process
-  - 'benchmarking.py' contains Benchmark objects, to run benchmarking process in confidence tuning for 1880
+  - `confidence_score_tuning.py` contains functions needed for the confidence tuning process
+  - `benchmarking.py` contains Benchmark objects, to run benchmarking process in confidence tuning for 1880
 - `/matching_viz` visualization web app to understand disambiguation output, see readme in folder for guidance on how to run
 
 ## Data
