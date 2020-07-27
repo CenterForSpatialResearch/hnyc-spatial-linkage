@@ -67,9 +67,6 @@ def elastic_to_disamb(elastic_search, city_directory, file = False):
     match = match.merge(latlng, how='left', on='OBJECTID', validate='many_to_one')
 
     return match
-
-
-
 """
 Create a list of dataframes where the top row is an anchor
 Each dataframe is one where spatial disambiguation will be applied
@@ -134,10 +131,16 @@ Returns the graph object
 """
 
 def create_path_graph(g, cluster_col='in_cluster_x', lat='LAT', lon='LONG'):
+    # display(g[["LONG", "LAT", "letter"]].head())
+    # print(g.columns)
     g.loc[:, 'key'] = 0
     g = g.merge(g, on='key')
+    # print("post merge", g.columns)
+    # display(g[["LONG_x", "LONG_y", "LAT_x", "LAT_y", "letter_x", "letter_y"]].head())
     g['key'] = g.apply(lambda row: 1 if int(row.letter_x[1:]) - int(row.letter_y[1:]) == -1 else 0, axis = 1)
     g = g[g.key == 1]
+    # display(g[["LONG_x", "LONG_y", "LAT_x", "LAT_y", "letter_x", "letter_y"]].head())
+    # print(g.columns)
 
     g['weight'] = g.apply(lambda row: haversine((row[lat + '_y'], row[lon + '_y']), (row[lat + '_x'], row[lon + '_x']), unit=Unit.METERS), axis=1)
     
