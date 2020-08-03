@@ -58,6 +58,10 @@ Similar, but no ED and address data, only ward data in the census.
    - `Feature_Exploration.ipynb`: Explores some of the columns in 1880 and 1850 datasets in order to determine what they represents and if they can be used for modelling
    - `Interpolation Pilots.ipynb`: Working notebook for starting explorations of options for interpolation (often moved into a separate notebook when they seem worth looking at in more depth)
    - `Linear_Model.ipynb`: Creates and tests linear models for house number interpolation
+   - `Examining Sequence Patters.ipynb`: Creates sequences based on haversine distances and tests using them for house number prediction with a linear model
+   - `Modeling Comparison.ipynb`: Tests different modeling approaches for house numbers (currently linear model and gradient boosting) -- includes haversine sequences and block numbers as features
+   - `Block_Numbers.ipynb`: Examines block number feature and tests use in linear model
+   - `interpolation.py`: Helper functions for interpolation process
 - `/disambiguation` is a python module containing wrapper functions needed in the disambiguation process
   - `init.py` contains a Disambiguator object, when instantiated can be used to run entire disambiguation process, calling functions from below (see `linkage_eda.ipynb` for example on usage)
   - `preprocess.py` contains functions needed before applying disambiguation algorithms, including confidence score generation
