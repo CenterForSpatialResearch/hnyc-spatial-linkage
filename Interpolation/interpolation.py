@@ -38,6 +38,7 @@ def col_for_seq(df, X, Y, Address = None, Ward = None):
     df['dist'] = df.apply(lambda row: haversine((row[X], row[Y]), (row["next_x"], row["next_y"]), unit=Unit.MILES), axis=1)
     df["num_between"] = df["next_dnl"] - df["dwelling_num_listed"] #really number between plus one
 
+
 """
 Creates train and test data
 data_1880: 1880 dataframe
@@ -47,8 +48,8 @@ both: boolean, if True creates training data that combines 1880 and 1850 dataset
 returns: list of train_X, train_Y, test_1880_X, test_1880_y, test_1850_X, test_1850_y
 """
 def create_train_test_data(data_1880, data_1850, cols, both = True):
-    data_1880 = data_1880.dropna(subset = ["house_number"]).fillna("None")
-    data_1850 = data_1850.dropna(subset = ["house_number"]).fillna("None")
+    data_1880 = data_1880.dropna(subset = ["house_number"])
+    data_1850 = data_1850.dropna(subset = ["house_number"])
     train_1880_X, test_1880_X, train_1880_y, test_1880_y = train_test_split(data_1880.loc[:,cols], data_1880.loc[:,"house_number"], random_state = 23)
 
     if not both:
@@ -117,22 +118,28 @@ returns: dwellings and entry level dataframes for both 1880 and 1850
 
 def sequence_datasets(census_1850, census_1880):
     census_1850 = census_1850.dropna(subset=["CENSUS_DWELLING_NUM"]).copy()
-    dwellings_1850 = census_1850.groupby(["WARD_NUM", "CENSUS_DWELLING_NUM"], as_index=False).first()
-    dwellings_1880 = census_1880.drop_duplicates(subset=["CENSUS_ADDRESS"]).copy()
 
-    col_for_seq(dwellings_1850, "CD_X", "CD_Y", Address=None, Ward=None)
-    col_for_seq(dwellings_1880, "POINT_X", "POINT_Y", Address=None, Ward=None)
+    dwellings_1850 = census_1850.groupby(["WARD_NUM", "CENSUS_DWELLING_NUM"], as_index=False).first()
+    dwellings_1850 = dwellings_1850.dropna(subset = ["CD_ADDRESS"]).copy()
+    dwellings_1880 = census_1880.drop_duplicates(subset=["CENSUS_ADDRESS"]).reset_index(drop = True).copy()
+
+    col_for_seq(dwellings_1850, "CD_X", "CD_Y")
+    col_for_seq(dwellings_1880, "POINT_X", "POINT_Y")
 
     dwellings_1850 = get_dist_seq(dwellings_1850, 0.15)[2]
     dwellings_1880 = get_dist_seq(dwellings_1880, 0.15)[2]
 
-    dwellings_1850.groupby("sequence_id").apply(sequence_order)
-    dwellings_1880.groupby("sequence_id").apply(sequence_order)
+    dwellings_1850 = dwellings_1850.groupby("sequence_id").apply(sequence_order)
+    dwellings_1880 = dwellings_1880.groupby("sequence_id").apply(sequence_order)
+
+    #Not super sure what's happening here, come back and check this
+    dwellings_1850 = dwellings_1850.groupby(["WARD_NUM", "CENSUS_DWELLING_NUM"], as_index=False).first()
+    dwellings_1880 = dwellings_1880.drop_duplicates(subset=["CENSUS_ADDRESS"]).reset_index(drop=True).copy()
 
     census_1880_model = dwellings_to_all(census_1880, dwellings_1880,
-                                                       ["CENSUS_MATCH_ADDR", "sequence_id", "sequence_order"] , ["CENSUS_MATCH_ADDR"])
+                                                       ["CENSUS_MATCH_ADDR", "sequence_id", "sequence_order", "num_between"], ["CENSUS_MATCH_ADDR"])
     census_1850_model = dwellings_to_all(census_1850, dwellings_1850,
-                                                       ["WARD_NUM", "CENSUS_DWELLING_NUM", "sequence_id", "sequence_order"],
+                                                       ["WARD_NUM", "CENSUS_DWELLING_NUM", "sequence_id", "sequence_order", "num_between"],
                                                        ["WARD_NUM", "CENSUS_DWELLING_NUM"])
 
     create_street_house(dwellings_1880, "CENSUS_ADDRESS")
