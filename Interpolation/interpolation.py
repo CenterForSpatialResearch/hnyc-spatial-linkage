@@ -47,16 +47,16 @@ cols: list of columns to include for training dataset
 both: boolean, if True creates training data that combines 1880 and 1850 dataset
 returns: list of train_X, train_Y, test_1880_X, test_1880_y, test_1850_X, test_1850_y
 """
-def create_train_test_data(data_1880, data_1850, cols, both = True):
-    data_1880 = data_1880.dropna(subset = ["house_number"])
-    data_1850 = data_1850.dropna(subset = ["house_number"])
-    train_1880_X, test_1880_X, train_1880_y, test_1880_y = train_test_split(data_1880.loc[:,cols], data_1880.loc[:,"house_number"], random_state = 23)
+def create_train_test_data(data_1880, data_1850, cols, y = "house_number", both = True):
+    data_1880 = data_1880.dropna(subset = [y])
+    data_1850 = data_1850.dropna(subset = [y])
+    train_1880_X, test_1880_X, train_1880_y, test_1880_y = train_test_split(data_1880.loc[:,cols], data_1880.loc[:,y], random_state = 23)
 
     if not both:
-        return [train_1880_X, train_1880_y, test_1880_X, test_1880_y, data_1850.loc[:,cols], data_1850.loc[:,"house_number"]]
+        return [train_1880_X, train_1880_y, test_1880_X, test_1880_y, data_1850.loc[:,cols], data_1850.loc[:,y]]
     else:
         train_1850_X, test_1850_X, train_1850_y, test_1850_y = train_test_split(data_1850.loc[:, cols],
-                                                                                data_1850.loc[:, "house_number"], random_state = 23)
+                                                                                data_1850.loc[:, y], random_state = 23)
         return [pd.concat([train_1880_X, train_1850_X]), pd.concat([train_1880_y, train_1850_y]), test_1880_X, test_1880_y, test_1850_X, test_1850_y]
 
 """
