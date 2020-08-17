@@ -1,5 +1,5 @@
 from disambiguation import Disambiguator1880
-from disambiguation.benchmark import Benchmark
+from disambiguation import Benchmark
 
 """
 Purpose: Generate confidence scores as a list
