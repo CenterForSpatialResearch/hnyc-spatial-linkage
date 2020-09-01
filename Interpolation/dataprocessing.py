@@ -42,6 +42,21 @@ def all_dwellings_sequenced(all_dwellings, known_dwellings, ward_col = "CENSUS_W
     prediction_data = prediction_data.groupby("sequence_id").apply(sequences.sequence_order)
     return prediction_data
 
+def create_unique_dwelling(df, dwelling_col = "CENSUS_DWELLING_NUM"):
+    dwelling = df[dwelling_col].iloc[0]
+    dwelling_num = 1
+    dwelling_id = []
+    for row in df.itertuples():
+        row_dwelling = getattr(row, dwelling_col)
+        if row_dwelling == dwelling:
+            dwelling_id.append(dwelling_num)
+        if row_dwelling != dwelling:
+            dwelling_num += 1
+            dwelling_id.append(dwelling_num)
+            dwelling = row_dwelling
+
+    df["dwelling_id"] = dwelling_id
+    return df
 
 
 

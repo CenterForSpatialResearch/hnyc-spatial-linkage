@@ -23,11 +23,25 @@ def add_disamb_census(disamb, census, disamb_columns = None, disamb_id = "CENSUS
 
     return census.merge(disamb_selected, how="left", left_on=census_id, right_on=disamb_id)
 
+"""
+Purpose: Get percentage of nonnull values in specific column of dataframe
+df: dataframe
+name: column to get rate of
+total: total number of values, if none, the total is considered to be the length of the dataframe
+"""
 def get_match_rate(df, name = "CD_ADDRESS", total = None):
     if total is None:
         total = len(df)
     return (df[name].count()/total)
 
+
+"""
+Purpose: Display match rates at the ward level
+df: dataframe
+ward_col: name of ward column
+name: column to get the rate of 
+total: total number of values, if none the total is considered to be the length of the dataframe
+"""
 def get_ward_match(df, ward_col = "CENSUS_WARD_NUM", name = "CD_ADDRESS", total = None):
     for ward, df_ward in df.groupby(ward_col):
         print("Ward ",str(ward),": ", round(get_match_rate(df_ward, name = name, total = total), 5))
@@ -39,7 +53,7 @@ ward: ward number column
 dwelling: dwelling number column
 address: address from linkage column
 """
-def get_counts(df, ward = "CENSUS_WARD_NUM", dwelling = "CENSUS_DWELLING_NUM", address = "CD_ADDRESS"):
+def get_counts(df, ward_col = "CENSUS_WARD_NUM", dwelling_col = "CENSUS_DWELLING_NUM", address = "CD_ADDRESS"):
 
     #save dwellings
     no_add = defaultdict(int)
@@ -51,7 +65,7 @@ def get_counts(df, ward = "CENSUS_WARD_NUM", dwelling = "CENSUS_DWELLING_NUM", a
     one_add_counts = 0
     more_add_counts = 0
 
-    for index, x in df.groupby([ward, dwelling]):
+    for index, x in df.groupby([ward_col, dwelling_col]):
         c = x[address].nunique()
         if c == 0:
             no_add[index[0]] += 1
@@ -66,7 +80,7 @@ def get_counts(df, ward = "CENSUS_WARD_NUM", dwelling = "CENSUS_DWELLING_NUM", a
     return {"no_address":(no_add, no_add_counts), "single_address":(one_add, one_add_counts), "multiple_addresses":(more_add, more_add_counts)}
 
 """
-Purpose: Generate census data with conflicts resolved by max spatial weight sum, designed for use with groupby.appy
+Purpose: Generate census data with conflicts resolved by max spatial weight sum, designed for use with groupby.apply
 x: dataframe with single dwelling
 address: address column
 block_num: block number column
@@ -74,14 +88,14 @@ lat: latitude column
 long: longitude column
 """
 
-def dwelling_weight_fill(x, address = "CD_ADDRESS", block_num = "BLOCK_NUM", lat = "CD_X", long = "CD_Y"):
+def dwelling_weight_fill(x, address = "CD_ADDRESS", block_col = "BLOCK_NUM", lat = "CD_X", long = "CD_Y"):
     if x[address].count() > 0:
         x["spatial_weight_sum"] = x.groupby([address])['spatial_weight'].transform('sum')
         x.reset_index(drop=True, inplace=True)
         index = x["spatial_weight_sum"].idxmax()
 
         x[address] = x.iloc[index].loc[address]
-        x[block_num] = x.iloc[index].loc[block_num]
+        x[block_col] = x.iloc[index].loc[block_col]
         x[lat] = x.iloc[index].loc[lat]
         x[long] = x.iloc[index].loc[long]
 
