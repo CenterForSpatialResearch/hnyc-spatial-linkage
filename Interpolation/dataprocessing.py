@@ -42,6 +42,12 @@ def all_dwellings_sequenced(all_dwellings, known_dwellings, ward_col = "CENSUS_W
     prediction_data = prediction_data.groupby("sequence_id").apply(sequences.sequence_order)
     return prediction_data
 
+"""
+Purpose: generate dwelling id that's unique for every dwelling
+df: dataframe with census data
+dwelling_col: column with dwelling number information from census
+"""
+
 def create_unique_dwelling(df, dwelling_col = "CENSUS_DWELLING_NUM"):
     dwelling = df[dwelling_col].iloc[0]
     dwelling_num = 1

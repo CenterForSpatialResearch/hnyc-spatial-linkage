@@ -111,6 +111,10 @@ def fixed_len_seq(df, n = 40):
     df["fixed_seq"] = seq
     return df
 
+"""
+Purpose: Get CENSUS_DWELLING_NUM based sequences
+returns: dataframe with dwelling_seq_id column
+"""
 def get_dwelling_seq(df, dwelling_col_num = "CENSUS_DWELLING_NUM"):
     df["dwelling_seq_id"] = np.where(df[dwelling_col_num] == 1, df[dwelling_col_num].index, np.nan)
     df["dwelling_seq_id"].ffill(inplace= True)

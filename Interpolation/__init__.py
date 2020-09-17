@@ -11,7 +11,7 @@ from functools import reduce
 #Store and modify census data post disambiguation and dwelling fillin/conflict resolution
 class CensusData:
 
-    def __init__(self, data, ward_col="Ward_Num", dwelling_col="dwelling_id", dwelling_col_num  = "CENSUS_DWELLING_NUM", block_col = "block_num", x_col = "cd_X", y_col = "cd_Y"):
+    def __init__(self, data, ward_col="Ward_Num", dwelling_col="dwelling_id", dwelling_col_num  = "CENSUS_DWELLING_NUM", block_col = "block_num", x_col = "cd_X", y_col = "cd_Y", pagenum = "CENSUS_PAGENUM"):
 
         #hold census data post disambiguation and dwelling fill in/conflict resolution
         self.data = data
@@ -23,6 +23,7 @@ class CensusData:
         self.dwelling_col_num = dwelling_col_num
         self.x_col = x_col
         self.y_col = y_col
+        self.pagenum = pagenum
 
         #holds data processesed as desired
         self.df = None
@@ -43,7 +44,7 @@ class CensusData:
         dwellings_cols = dwellings_cols.groupby(self.ward_col, as_index=False).apply(
             lambda x: sequences.get_dist_seq(x, d))
         return dwellings_cols.loc[:, [self.ward_col, self.dwelling_col, "sequence_id", "num_between",
-                                              "sequence_order_enum", "next_x", "next_y", "dist"]].copy()
+                                              "sequence_order_enum", "dist", "sequence_len"]].copy()
 
     """
     Purpose: Create dataframe of all census records with sequences added in
@@ -64,17 +65,38 @@ class CensusData:
         census_1850_model.dropna(inplace=True, subset=["sequence_id"])
         self.df = census_1850_model
 
+    '''
+    Purpose: Get sequences with n dwellings each (the last one will have remaining dwellings)
+    n: number of dwellings in sequence
+    returns: dwellings with ward column, dwelling column, and fixed_seq column (individual dwellings only)
+    '''
     def get_dwellings_fixed_seq(self, n = 40):
         dwellings = self.get_dwellings()
         dwellings_fixed = dwellings.groupby(self.ward_col, as_index = False).apply(lambda x: sequences.fixed_len_seq(x, n))
         return dwellings_fixed.loc[:, [self.ward_col, self.dwelling_col, "fixed_seq"]]
 
+    """
+    Purpose: Get sequences based on CENSUS_DWELLING_NUM
+    returns: dataframe with ward column, dwelling column, and dwelling_seq _id (individual dwellings only) 
+    """
     def get_dwellings_dwellings_seq(self):
         dwellings = self.get_dwellings()
         dwellings_dwellings_seq = dwellings.groupby(self.ward_col, as_index = False).apply(lambda x: sequences.get_dwelling_seq(x, self.dwelling_col_num))
         return dwellings_dwellings_seq.loc[:, [self.ward_col, self.dwelling_col, "dwelling_seq_id"]]
 
     #new forms of sequence creation can be applied here
+    """
+    Purpose: apply specified sequencing
+    d: maximum distance, for distance, enumerator_dist sequences
+    n: number of dwellings, for fixed sequences
+    distance: distance based sequences, divided based on max consecutive distance
+    fixed: sequences with n dwellings
+    dwelling: sequences based on CENSUS_DWELLING_NUM column from data
+    enumerator: sequences based on dwellings visited by a given enumerator in a single day
+    tuned: distance sequences were tuned
+    enumerator_dist: distance based sequences, built within enumerator sequences (rather than simply within wards)
+    sets self.df to a dataframe with specified sequences and all census records
+    """
     def apply_sequencing(self, d = 0.1, n = 40, distance = False, fixed = False, dwelling = False, enumerator = False,tuned = False, enumerator_dist = False):
         sequences_dfs = []
         if distance:
@@ -98,12 +120,20 @@ class CensusData:
             dwellings_dist = dwellings_dist.groupby("enum_seq", as_index=False).apply(
                 lambda x: sequences.get_dist_seq(x, d))
 
-            dwellings_dist.rename(columns = {"sequence_id":"enum_dist_id", "sequence_order_enum":"enum_dist_order"}, inplace = True)
-            sequences_dfs.append(dwellings_dist.loc[:, [self.ward_col, self.dwelling_col, "enum_dist_id", "enum_dist_order"]].copy())
+            dwellings_dist.rename(columns = {"sequence_id":"enum_dist_id", "sequence_order_enum":"enum_dist_order", "dist":"enum_dist", "sequence_len":"enum_sequence_len"}, inplace = True)
+            sequences_dfs.append(dwellings_dist.loc[:, [self.ward_col, self.dwelling_col, "enum_dist_id", "enum_dist_order", "enum_dist", "enum_sequence_len"]].copy())
 
         self.df = reduce(lambda x, y: pd.merge(x, y, how = "left", on = [self.ward_col, self.dwelling_col]), sequences_dfs, self.data)
 
+        if enumerator_dist:
+            self.df = self.df.dropna(subset = [self.pagenum])
 
+    """
+    Purpose: Get sequences of dwellings visited by given enumerator in a single day
+    enum_num: column name of census enumerator label
+    date: column name of date
+    all: whether to include all census records or not
+    """
     def get_enum_seq(self, enum_num = "CENSUS_ENUMERATOR_NUM", date = "CENSUS_ENUMERATOR_DATE", all = False):
         dwellings = self.get_dwellings()
         with_labels = []
@@ -119,7 +149,9 @@ class CensusData:
 
         return final_dwells.loc[:,[self.ward_col, self.dwelling_col, "enum_seq"]]
 
+    """
 
+    """
     def census_dwelling_records_between(self, d = 0.1, column = None, tuned = None):
         if column is None:
             column = self.block_col
@@ -137,6 +169,7 @@ class CensusData:
         self.df = self.data
 
 
+#Base class for interpolation, not meant to be instantiated
 class Interpolator:
 
     def __init__(self, census_data, ward, model, feature_names, *args):
@@ -184,14 +217,20 @@ class Interpolator:
     def train_test_model(self, train, test, train_y = None, test_y = None):
 
         if train_y is None:
-            self.model.fit(train.loc[:,self.feature_names], train[self.y])
-            self.train_score = self.model.score(train.loc[:,self.feature_names], train[self.y])
-            self.test_score = self.model.score(test.loc[:, self.feature_names], test[self.y])
+            tr = train.loc[:,self.feature_names]
+            tr_y = train[self.y]
+            te = test.loc[:, self.feature_names]
+            te_y = test[self.y]
+            self.model.fit(tr, tr_y)
+            self.train_score = self.model.score(tr, tr_y)
+            self.test_score = self.model.score(te, te_y)
 
         else:
-            self.model.fit(train.loc[:, self.feature_names], train_y)
-            self.train_score = self.model.score(train.loc[:, self.feature_names], train_y)
-            self.test_score = self.model.score(test.loc[:, self.feature_names], test_y)
+            tr = train.loc[:, self.feature_names]
+            te = train.loc[:, self.feature_names]
+            self.model.fit(tr, train_y)
+            self.train_score = self.model.score(tr, train_y)
+            self.test_score = self.model.score(te, test_y)
 
     """
     Purpose: Use model for predicting values after training

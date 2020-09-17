@@ -52,16 +52,29 @@ Similar, but no ED and address data, only ward data in the census.
   - `run_link_records.ipynb`: implemented record matching using pyspark
   - `confidence_score_latlng.ipynb`: adding of census conflicts to confidence score, merging of lat lng data (contains most updated confidence score formula)
   - `linkage_full_run_SPRING_LATEST.ipynb`: informed by linkage EDA (see archive), generates latest disambiguated output from ES matching (with metaphone issue fixed)
-- `/Interpolation`   
-   - `1880_1850_for_Interpolation.ipynb`: Explores 1880 and 1850 census datasets
-   - `Dwelling Addresses.ipynb`: Documents different methods for filling in addresses at dwelling level for 1850
-   - `Feature_Exploration.ipynb`: Explores some of the columns in 1880 and 1850 datasets in order to determine what they represents and if they can be used for modelling
-   - `Interpolation Pilots.ipynb`: Working notebook for starting explorations of options for interpolation (often moved into a separate notebook when they seem worth looking at in more depth)
-   - `Linear_Model.ipynb`: Creates and tests linear models for house number interpolation
-   - `Examining Sequence Patters.ipynb`: Creates sequences based on haversine distances and tests using them for house number prediction with a linear model
-   - `Modeling Comparison.ipynb`: Tests different modeling approaches for house numbers (currently linear model and gradient boosting) -- includes haversine sequences and block numbers as features
-   - `Block_Numbers.ipynb`: Examines block number feature and tests use in linear model
-   - `interpolation.py`: Helper functions for interpolation process
+- `/interpolation_notebooks`
+    - `Process_Documentation`
+       - `Disambiguation_Analysis_v01.ipynb`: Resolves dwelling conflicts, calculates statistics,explores distance based sequences, and interpolation between known dwellings   
+       - `Interpolation_v01.ipynb`: Runs through current version of predicting unknown records
+     - `Concepts_and_Development`:
+       - `Block and Centroid Prediction with Analysis.ipynb`: Walks through approaches to predicting block numbers directly, and then clusters (tests different clustering algorithms)
+       - `Block Centroids and What They Represent, 1850.ipynb`: Creates block centroids and illustrates them with visualizations
+       - `Dwelling Addresses Fill In and Conflict Resolution Development.ipynb`: Development of conflict resolution within dwelling process
+       - `Developing Distance Based Sequences.ipynb`: Process of developing distance based sequences
+       - `Model Comparison.ipynb`: Tests a few different model options (no in depth tuning)
+       - `Sequences Exploration.ipynb`: Tests different iterations of sequence identification
+       -  `Model Exploration.ipynb`: Brief experimentation with using neural networks, incomplete because of preprocessing necessary
+     - `Archived` 
+       - `1880_1850_for_Interpolation.ipynb`: Explores 1880 and 1850 census datasets
+       - `Feature_Exploration.ipynb`: Explores some of the columns in 1880 and 1850 datasets in order to determine what they represents and if they can be used for modelling
+       - `Interpolation Pilots.ipynb`: Working notebook for starting explorations of options for interpolation (often moved into a separate notebook when they seem worth looking at in more depth)
+       - `Linear_Model.ipynb`: Creates and tests linear models for house number interpolation
+       - `Modeling Comparison.ipynb`: Tests different modeling approaches for house numbers (currently linear model and gradient boosting) -- includes haversine sequences and block numbers as features
+       - `Block_Numbers Early Exploration.ipynb`: Explore block numbers distributions/data analysis and try using them as feature to predict house number
+       - `Street_Dictionaries.ipynb`: Tried out looking at street dictionaries for dwellings in between
+       - `Block Number Prediction.ipynb`: Initial experiment with predicting block numbers
+       - `Interpolation between known address development.ipynb`: Process of looking at values between known dwellings
+- `/interpolation` See read me within this folder for details
 - `/disambiguation` is a python module containing wrapper functions needed in the disambiguation process
   - `init.py` contains a Disambiguator object, when instantiated can be used to run entire disambiguation process, calling functions from below (see `linkage_eda.ipynb` for example on usage)
   - `preprocess.py` contains functions needed before applying disambiguation algorithms, including confidence score generation

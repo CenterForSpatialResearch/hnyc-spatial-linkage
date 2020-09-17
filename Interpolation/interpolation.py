@@ -120,7 +120,6 @@ d: denominator
 def div_zero(n, d):
     return n / d if d else 0
 
-
 """
 Purpose: Target encodes train and test data, subseting the train data by features, and using y as class labels
 Train: Training dataset
