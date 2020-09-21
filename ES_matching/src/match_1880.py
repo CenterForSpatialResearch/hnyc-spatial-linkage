@@ -44,7 +44,7 @@ def get_matches():
                 if config['metaphone'] is 1:
                     query = { "bool" : { "must" : [{ "fuzzy": { "CENSUS_NAMEFRSTB": { "value": data["CD_FIRST_NAME"], "fuzziness": config["edit_distance"], "max_expansions": 50, "prefix_length": 0, "transpositions": True, "rewrite": "constant_score" } } }, 
                             {"fuzzy": { "CENSUS_NAMELASTB": { "value": data["CD_LAST_NAME"], "fuzziness": config["edit_distance"], "max_expansions": 50, "prefix_length": 0, "transpositions": True, "rewrite": "constant_score" } }},
-                                    { "match" : { "WARD_NUM": data["WARD_NUM"]} },
+                                    { "match" : { "WARD_NUM": data["CD_WARD_NUM"]} },
                                     { "match" : { "CENSUS_ENUMDIST": data["CD_ED"]} },
                                     {"terms": {"METAPHONE_NAMELAST.keyword": last_name_metaphone}},
                                     {"terms": {"METAPHONE_NAMEFIRST.keyword": first_name_metaphone}}
@@ -54,7 +54,7 @@ def get_matches():
                 else:
                     query = { "bool" : { "must" : [{ "fuzzy": { "CENSUS_NAMEFRSTB": { "value": data["CD_FIRST_NAME"], "fuzziness": config["edit_distance"], "max_expansions": 50, "prefix_length": 0, "transpositions": True, "rewrite": "constant_score" } } }, 
                             {"fuzzy": { "CENSUS_NAMELASTB": { "value": data["CD_LAST_NAME"], "fuzziness": config["edit_distance"], "max_expansions": 50, "prefix_length": 0, "transpositions": True, "rewrite": "constant_score" } }},
-                                    { "match" : { "WARD_NUM": data["WARD_NUM"]} },
+                                    { "match" : { "WARD_NUM": data["CD_WARD_NUM"]} },
                                     { "match" : { "CENSUS_ENUMDIST": data["CD_ED"]}}
                                     ],
                             }}
@@ -64,7 +64,7 @@ def get_matches():
                 if config['metaphone'] is 1:
                     query =  { "bool" : { "must" : [ #{ "match": { "CENSUS_NAMEFRSTB": data["CD_FIRST_NAME"] } },
                           #  { "match": { "CENSUS_NAMELASTB": data["CD_LAST_NAME"] } },
-                            { "match" : { "WARD_NUM": data["WARD_NUM"]} },
+                            { "match" : { "WARD_NUM": data["CD_WARD_NUM"]} },
                             { "match" : { "CENSUS_ENUMDIST": data["CD_ED"]} },
                             {"terms": {"METAPHONE_NAMELAST.keyword": last_name_metaphone}},
                             {"terms": {"METAPHONE_NAMEFIRST.keyword": first_name_metaphone}}
@@ -74,7 +74,7 @@ def get_matches():
                 else:
                     query = { "bool" : { "must" : [{ "match": { "CENSUS_NAMEFRSTB": data["CD_FIRST_NAME"] } },
                             { "match": { "CENSUS_NAMELASTB": data["CD_LAST_NAME"] } },
-                            { "match" : { "WARD_NUM": data["WARD_NUM"]} },
+                            { "match" : { "WARD_NUM": data["CD_WARD_NUM"]} },
                             { "match" : { "CENSUS_ENUMDIST": data["CD_ED"]} }
                             ]}}
 
@@ -98,7 +98,7 @@ def get_matches():
 
                     writer.writerow(content.rstrip("\t").split("\t"))
 
-                fw2.write(str(data['OBJECTID'])+"\n")
+                fw2.write(str(data['CD_RECORD_ID'])+"\n")
                 count_unmatch+=1
             
 
