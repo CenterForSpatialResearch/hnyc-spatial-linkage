@@ -11,7 +11,7 @@ from functools import reduce
 #Store and modify census data post disambiguation and dwelling fillin/conflict resolution
 class CensusData:
 
-    def __init__(self, data, ward_col="Ward_Num", dwelling_col="dwelling_id", dwelling_col_num  = "CENSUS_DWELLING_NUM", block_col = "block_num", x_col = "cd_X", y_col = "cd_Y", pagenum = "CENSUS_PAGENUM"):
+    def __init__(self, data, ward_col="CENSUS_WARD_NUM", dwelling_col="dwelling_id", dwelling_col_num  = "CENSUS_DWELLING_NUM", block_col = "CD_BLOCK_NUM", x_col = "CD_X", y_col = "CD_Y", pagenum = "CENSUS_PAGENUM"):
 
         #hold census data post disambiguation and dwelling fill in/conflict resolution
         self.data = data

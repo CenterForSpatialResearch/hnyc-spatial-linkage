@@ -16,7 +16,7 @@ def add_disamb_census(disamb, census, disamb_columns = None, disamb_id = "CENSUS
 
     #Get selected matches and relevent columns from the disambiguation data
     disamb_selected = disamb[disamb["selected"] == 1].copy()
-    disamb_selected = disamb_selected.loc[:,disamb_columns].copy()
+    disamb_selected = disamb_selected.loc[:, disamb_columns].copy()
 
     if disamb_id == "CENSUS_ID":
         disamb_selected.loc[:, "CENSUS_ID"] = disamb_selected["CENSUS_ID"].apply(lambda x: x.strip("CENSUS_"))
