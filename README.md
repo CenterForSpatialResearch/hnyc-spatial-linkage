@@ -3,7 +3,7 @@
 ## Summer 2020
 1. Developed confidence score tuning process (see `disambiguation_1880` folder)
 2. Developed interpolation process (see `interpolation` folder for code and `interpolation_notebooks` folder for jupyter notebooks that document process)
-3. For overview of process and next steps see `HNYC_Project/Projects/spatial_linkage/Spatial Linkage & Interpolation: Summer 2020.ppt` and `HNYC_Project/Projects/spatial_linkage/Spatial Linkage and Interpolation Workflow.doc`
+3. For overview of process and next steps see google drive `HNYC_Project/Projects/spatial_linkage/Spatial Linkage & Interpolation: Summer 2020.ppt` and `HNYC_Project/Projects/spatial_linkage/Spatial Linkage and Interpolation Workflow.doc`
 
 ## Spring 2020 Actions
 Accomplished:  
