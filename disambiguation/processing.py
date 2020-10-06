@@ -3,12 +3,40 @@ import networkx as nx
 import numpy as np
 from pyjarowinkler import distance
 from haversine import haversine, Unit
+import time
+
+
+def col_for_disamb(df, cd_id, cen_id, cd_fn="CD_FIRST_NAME", cen_fn="CENSUS_FIRST_NAME", cd_ln="CD_LAST_NAME",
+                           cen_ln="CENSUS_LAST_NAME", cen_occ="CENSUS_OCCUPATION", cen_age="CENSUS_AGE"):
+    # name jw dist
+    df["jw_fn"] = df.apply(lambda x: distance.get_jaro_distance(x[cd_fn], x[cen_fn], winkler=True, scaling=0.1), axis=1)
+    df["jw_ln"] = df.apply(lambda x: distance.get_jaro_distance(x[cd_ln], x[cen_ln], winkler=True, scaling=0.1), axis=1)
+    df["jw_score"] = 0.4 * df["jw_fn"] + 0.6 * df["jw_ln"]
+
+    # occ
+    df['occ_listed'] = np.where((df[cen_occ].isnull()) | (df[cen_occ] == '*'), 0, 1)
+
+    # age
+    df['age_score'] = np.where(df[cen_age] <= 12, 0, 1)
+
+    # cd conflicts
+    df["cd_count"] = df.groupby(cd_id)[cen_id].transform('count')
+    df["census_count"] = df.groupby(cen_id)[cd_id].transform('count')
+
+    df['census_count_inverse'] = 1 / df['census_count']
+    df['cd_count_inverse'] = 1 / df['cd_count']
+
+    #This is so the bipartite matching algorthm works the way we need it to
+    df['CD_ID'] = 'CD_' + df[cd_id].astype(str)
+    df['CENSUS_ID'] = 'CENSUS_' + df[cen_id].astype(str)
+
+    return df
+
 
 """
 Applies confidence score to df
 """
-
-def apply_confidence_score(df, cd_fn = "CD_FIRST_NAME", cen_fn = "CENSUS_NAMEFRSTB", cd_ln = "CD_LAST_NAME", cen_ln = "CENSUS_NAMELASTB", cen_occ = "CENSUS_OCCLABELB", cen_age = "CENSUS_AGE", cd_id="OBJECTID", cen_id="OBJECTID.x"):
+def apply_confidence_score(df, cd_fn = "CD_FIRST_NAME", cen_fn = "CENSUS_FIRST_NAME", cd_ln = "CD_LAST_NAME", cen_ln = "CENSUS_LAST_NAME", cen_occ = "CENSUS_OCCLABELB", cen_age = "CENSUS_AGE", cd_id="OBJECTID", cen_id="OBJECTID.x"):
     
     # name jw dist
     df["jw_fn"] = df.apply(lambda x: distance.get_jaro_distance(x[cd_fn], x[cen_fn], winkler=True, scaling=0.1), axis = 1)
@@ -28,10 +56,12 @@ def apply_confidence_score(df, cd_fn = "CD_FIRST_NAME", cen_fn = "CENSUS_NAMEFRS
     df['confidence_score'] = .5*df.jw_score + .2*(1/df.cd_count) + \
                              .2*(1/df.census_count) + .05*df.occ_listed + \
                              .05*df.age_score
-    df['confidence_score'] = df['confidence_score'].round(decimals = 2)    
+    df['confidence_score'] = df['confidence_score'].round(decimals = 2)
 
     return df
 
+
+#not needed in new run
 """
 Takes elastic search and census directory geocode file to create a dataframe 
 ready for the disambiguation process.
@@ -41,7 +71,6 @@ city_directory: either df with city directory data or file name
 file: boolean value, set to True if elastic_search/city_directory are file names otherwise set 
 to false. Default false 
 """
-
 def elastic_to_disamb(elastic_search, city_directory, file = False):
 
     if file:
@@ -107,8 +136,8 @@ node_ID: unique node ID. each node is a match, so e.g. A0 and A1 refers to two p
 letter: grouping for identical census records 
 add_prefixes: whether to add prefixes 'CD_' and 'CENSUS_' to cd_id and census_id respectively. prefixes are required for subsequent bipartite matching
 """
-def create_path_df(sub_graph, census_id = "CENSUS_ID", confidence = "confidence_score"):
-    
+def create_path_df(sub_graph, census_id = "CENSUS_ID"):
+
     sub_graph['node_ID'] = sub_graph.groupby(census_id).cumcount()
 
     letter_id = sub_graph[census_id].unique().tolist()
@@ -118,7 +147,7 @@ def create_path_df(sub_graph, census_id = "CENSUS_ID", confidence = "confidence_
     sub_graph = sub_graph.merge(letter_id, how='left', left_on=census_id, right_on="CENSUS_ID", validate='many_to_one')
 
     sub_graph['node_ID'] = sub_graph.apply(lambda row: row.letter + '_' + str(row.node_ID), axis=1)
-    
+
     return sub_graph
 
 """
@@ -130,25 +159,24 @@ cluster_col: name of column with cluster group. If does not exist, use None
 Returns the graph object
 """
 
-def create_path_graph(g, cluster_col='in_cluster_x', lat='LAT', lon='LONG'):
-    # display(g[["LONG", "LAT", "letter"]].head())
-    # print(g.columns)
+def create_path_graph(g, cluster_col='in_cluster_x', lat='CD_X', lon='CD_Y'):
+
     g.loc[:, 'key'] = 0
     g = g.merge(g, on='key')
-    # print("post merge", g.columns)
-    # display(g[["LONG_x", "LONG_y", "LAT_x", "LAT_y", "letter_x", "letter_y"]].head())
+
+    #This is time consuming
     g['key'] = g.apply(lambda row: 1 if int(row.letter_x[1:]) - int(row.letter_y[1:]) == -1 else 0, axis = 1)
+
     g = g[g.key == 1]
-    # display(g[["LONG_x", "LONG_y", "LAT_x", "LAT_y", "letter_x", "letter_y"]].head())
-    # print(g.columns)
 
     g['weight'] = g.apply(lambda row: haversine((row[lat + '_y'], row[lon + '_y']), (row[lat + '_x'], row[lon + '_x']), unit=Unit.METERS), axis=1)
-    
+
     if cluster_col != None:
         g['weight'] = g.apply(lambda row: row.weight + 999 if row[cluster_col] == -1 else row.weight, axis=1)
-    
+
     g_edges = [(row.node_ID_x, row.node_ID_y, row.weight) for index, row in g.iterrows()]
     graph = nx.DiGraph()
     graph.add_weighted_edges_from(g_edges)
+
     
     return graph

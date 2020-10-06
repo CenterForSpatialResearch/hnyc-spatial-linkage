@@ -21,10 +21,12 @@ logger = logging.getLogger('directMatch')
 def get_matches():
     df = pd.read_csv(config['cd_filename'])
     count_match, count_unmatch=0,0
+
     with open(config['match_output_filename'],'w') as fw, open(config['unmatch_output_filename'],'w') as fw2:
         writer = csv.writer(fw, delimiter="\t")
         columns = config["output_census_cols"] + config["output_city_directory_cols"]
         rows=""
+
         for cols in columns:
             rows = rows + cols + "\t"
         
@@ -42,46 +44,42 @@ def get_matches():
 
             if config['edit_distance'] !=0:
                 if config['metaphone'] is 1:
-                    query = { "bool" : { "must" : [{ "fuzzy": { "CENSUS_NAMEFRSTB": { "value": data["CD_FIRST_NAME"], "fuzziness": config["edit_distance"], "max_expansions": 50, "prefix_length": 0, "transpositions": True, "rewrite": "constant_score" } } }, 
-                            {"fuzzy": { "CENSUS_NAMELASTB": { "value": data["CD_LAST_NAME"], "fuzziness": config["edit_distance"], "max_expansions": 50, "prefix_length": 0, "transpositions": True, "rewrite": "constant_score" } }},
-                                    { "match" : { "WARD_NUM": data["CD_WARD_NUM"]} },
-                                    { "match" : { "CENSUS_ENUMDIST": data["CD_ED"]} },
+                    query = { "bool" : { "must" : [{ "fuzzy": { "CENSUS_FIRST_NAME": { "value": data["CD_FIRST_NAME"], "fuzziness": config["edit_distance"], "max_expansions": 50, "prefix_length": 0, "transpositions": True, "rewrite": "constant_score" } } },
+                            {"fuzzy": { "CENSUS_LAST_NAME": { "value": data["CD_LAST_NAME"], "fuzziness": config["edit_distance"], "max_expansions": 50, "prefix_length": 0, "transpositions": True, "rewrite": "constant_score" } }},
+                                    { "match" : { "CENSUS_WARD_NUM": data["CD_WARD_NUM"]} },
+                                    { "match" : { "CENSUS_ED": data["CD_ED"]} },
                                     {"terms": {"METAPHONE_NAMELAST.keyword": last_name_metaphone}},
-                                    {"terms": {"METAPHONE_NAMEFIRST.keyword": first_name_metaphone}}
-                                    ],
+                                    {"terms": {"METAPHONE_NAMEFIRST.keyword": first_name_metaphone}}]
                             }}
 
                 else:
-                    query = { "bool" : { "must" : [{ "fuzzy": { "CENSUS_NAMEFRSTB": { "value": data["CD_FIRST_NAME"], "fuzziness": config["edit_distance"], "max_expansions": 50, "prefix_length": 0, "transpositions": True, "rewrite": "constant_score" } } }, 
-                            {"fuzzy": { "CENSUS_NAMELASTB": { "value": data["CD_LAST_NAME"], "fuzziness": config["edit_distance"], "max_expansions": 50, "prefix_length": 0, "transpositions": True, "rewrite": "constant_score" } }},
-                                    { "match" : { "WARD_NUM": data["CD_WARD_NUM"]} },
-                                    { "match" : { "CENSUS_ENUMDIST": data["CD_ED"]}}
+                    query = { "bool" : { "must" : [{ "fuzzy": { "CENSUS_FIRST_NAME": { "value": data["CD_FIRST_NAME"], "fuzziness": config["edit_distance"], "max_expansions": 50, "prefix_length": 0, "transpositions": True, "rewrite": "constant_score" } } },
+                            {"fuzzy": { "CENSUS_LAST_NAME": { "value": data["CD_LAST_NAME"], "fuzziness": config["edit_distance"], "max_expansions": 50, "prefix_length": 0, "transpositions": True, "rewrite": "constant_score" } }},
+                                    { "match" : { "CENSUS_WARD_NUM": data["CD_WARD_NUM"]} },
+                                    { "match" : { "CENSUS_ED": data["CD_ED"]}}
                                     ],
                             }}
             
 
             if config['edit_distance'] is 0:
                 if config['metaphone'] is 1:
-                    query =  { "bool" : { "must" : [ #{ "match": { "CENSUS_NAMEFRSTB": data["CD_FIRST_NAME"] } },
-                          #  { "match": { "CENSUS_NAMELASTB": data["CD_LAST_NAME"] } },
-                            { "match" : { "WARD_NUM": data["CD_WARD_NUM"]} },
-                            { "match" : { "CENSUS_ENUMDIST": data["CD_ED"]} },
+                    query = { "bool" : { "must" : [ { "match" : { "CENSUS_WARD_NUM": data["CD_WARD_NUM"]} },
+                            #{ "match" : { "CENSUS_ED": data["CD_ED"]} }, #add this back in once ed column data is fixed
                             {"terms": {"METAPHONE_NAMELAST.keyword": last_name_metaphone}},
                             {"terms": {"METAPHONE_NAMEFIRST.keyword": first_name_metaphone}}
                             ]}}
-                    
             
                 else:
-                    query = { "bool" : { "must" : [{ "match": { "CENSUS_NAMEFRSTB": data["CD_FIRST_NAME"] } },
-                            { "match": { "CENSUS_NAMELASTB": data["CD_LAST_NAME"] } },
-                            { "match" : { "WARD_NUM": data["CD_WARD_NUM"]} },
-                            { "match" : { "CENSUS_ENUMDIST": data["CD_ED"]} }
+                    query = { "bool" : { "must" : [{ "match": { "CENSUS_FIRST_NAME": data["CD_FIRST_NAME"] } },
+                            { "match": { "CENSUS_LAST_NAME": data["CD_LAST_NAME"] } },
+                            { "match" : { "CENSUS_WARD_NUM": data["CD_WARD_NUM"]} },
+                            { "match" : { "CENSUS_ED": data["CD_ED"]} }
                             ]}}
 
             
             try:
                 res = es.search(index=config["es-index"], body={ "from": 0, "size": 10000, "query":query})
-            except exceptions.RequestError:
+            except exceptions.RequestError as e:
                 print(idx)
                 continue
         

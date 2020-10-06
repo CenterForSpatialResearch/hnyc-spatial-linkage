@@ -36,8 +36,7 @@ cen_lat: name of census lat column
 lon: name of long column
 lat: name of lat column
 """
-def get_dist_error(df, cen_lon='CENSUS_X', cen_lat='CENSUS_Y', lon='LONG', lat='LAT'):
-
+def get_dist_error(df, cen_lon='CENSUS_X', cen_lat='CENSUS_Y', lon='CD_X', lat='CD_Y'):
     df['dist'] = df.apply(lambda row: haversine((row[cen_lat], row[cen_lon]), (row[lat], row[lon]), unit=Unit.METERS), axis=1)
     return df
 
@@ -57,7 +56,7 @@ def get_under12_selections(df, age='CENSUS_AGE'):
 Get df containing selected matches based on actual distances and confidence score
 df: any match df containing at least cd_id, census_id, census long/lat, cd long/lat and confidence score. preferably df with 'dist' column (after get_dist_error())
 """
-def get_dist_based_match(df, cen_lon='CENSUS_X', cen_lat='CENSUS_Y', lon='LONG', lat='LAT', cd_id='CD_ID', census_id='CENSUS_ID', confidence='confidence_score'):
+def get_dist_based_match(df, cen_lon='CENSUS_X', cen_lat='CENSUS_Y', lon='CD_X', lat='CD_Y', cd_id='CD_ID', census_id='CENSUS_ID', confidence='confidence_score'):
     if 'dist' not in df.columns:
         df = get_dist_error(df, cen_lon=cen_lon, cen_lat=cen_lat, lon=lon, lat=lat)
     

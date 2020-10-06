@@ -2,10 +2,10 @@
     "host": "localhost",
     "port": 9200,
     "year": 1880,
-    "cd_filename": "../../data/cd_1880_mn_v04.csv",
-    "census_filename": "../../data/census_1880_mn_v04.csv",
-    "census_first_name": "CENSUS_NAMEFRSTB",
-    "census_last_name": "CENSUS_NAMELASTB",
+    "cd_filename": "../../data/cd_1880_mn_20200918.csv",
+    "census_filename": "../../data/census_1880_mn_20200921.csv",
+    "census_first_name": "CENSUS_FIRST_NAME",
+    "census_last_name": "CENSUS_LAST_NAME",
     "match_output_filename": "../../data/test.csv",
     "unmatch_output_filename": "../../data/test-u.csv",
     "es-index": "census-1880-full",
@@ -13,6 +13,6 @@
     "ingest_size": 10000,
     "metaphone": 1,
     "edit_distance": 0,
-    "output_census_cols": ["OBJECTID.x","CENSUS_NAMEFRSTB","CENSUS_NAMELASTB","CENSUS_AGE","CENSUS_OCCLABELB","CENSUS_MATCH_ADDR","CENSUS_SEGMENT_ID"],
-    "output_city_directory_cols": ["OBJECTID", "CD_INDEX","CD_RECORD_ID","CD_FIRST_NAME","CD_LAST_NAME", "CD_OCCUPATION_STD","CD_H_ADDRESS", "CD_H_HOUSE_NUMBER", "CD_H_STREET_NAME","CD_BLOCK_NUM", "CD_WARD_NUM", "CD_ED","CD_X", "CD_Y"]
+    "output_census_cols": ["CENSUS_INDEX", "CENSUS_OBJECTID", "CENSUS_MERGEID", "CENSUS_SERIAL", "CENSUS_REEL", "CENSUS_VOLUME", "CENSUS_PAGENUM", "CENSUS_FIRST_NAME", "CENSUS_LAST_NAME", "CENSUS_RELATE", "CENSUS_AGE", "CENSUS_GENDER", "CENSUS_RACE", "CENSUS_OCCUPATION", "CENSUS_MATCH_ADDR", "CENSUS_AD", "CENSUS_X", "CENSUS_Y"],
+    "output_city_directory_cols": ["OBJECTID", "CD_INDEX","CD_RECORD_ID","CD_FIRST_NAME","CD_LAST_NAME", "CD_OCCUPATION_STD","CD_H_ADDRESS", "CD_H_HOUSE_NUMBER", "CD_H_STREET_NAME","CD_BLOCK_NUM", "CD_WARD_NUM", "CD_X", "CD_Y"]
 }

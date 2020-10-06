@@ -4,10 +4,11 @@ import disambiguation.processing as dp
 import disambiguation.disambiguation as dl
 import disambiguation.analysis as da
 import disambiguation.benchmark as bm
+import time
 
 class Disambiguator:
 
-    def __init__(self, match_df, cd_id="CD_ID", census_id="CENSUS_ID", confidence="confidence_score", census_count='census_count', lon="LONG", lat="LAT", sort_var="CENSUS_ID"):
+    def __init__(self, match_df, cd_id="CD_ID", census_id="CENSUS_ID", confidence="confidence_score", census_count='census_count', lon="CD_Y", lat="CD_X", sort_var="CENSUS_ID"):
         # initialize input 
         self.input = match_df
 
@@ -25,6 +26,7 @@ class Disambiguator:
         self.results = None
 
     def run_disambiguation(self, cluster=True, k_between=True, cluster_kwargs = {}, path_kwargs = {}):
+        start_time = time.time()
         print("Running")
 
         print("Creating dictionary of sub dfs (1/4)...")
@@ -50,6 +52,8 @@ class Disambiguator:
         self.bipartite = disambiguated['graph']
         self.results = disambiguated['results']
 
+        end_time = time.time()
+        print("Total time:", end_time - start_time)
         print("Done! :)")
     
     def get_result(self):
@@ -84,7 +88,10 @@ class Disambiguator1880(Disambiguator):
         except AttributeError:
             raise Exception("Please run run_disambiguation() first")
 
-    def set_var(self, var={'cen_lon': 'CENSUS_X', 'cen_lat': 'CENSUS_Y', 'cen_add': 'MATCH_ADDR', 'cd_add': 'CENSUS_MATCH_ADDR'}):
+    def set_var(self, var= None):
+        if var is None:
+            var = {'cen_lon': 'CENSUS_X', 'cen_lat': 'CENSUS_Y', 'cen_add': 'CENSUS_MATCH_ADDR', 'cd_add': 'MATCH_ADDR'}
+
         for key, value in var.items():
             setattr(self, key, value)
 
@@ -106,7 +113,6 @@ class Disambiguator1880(Disambiguator):
         return da.get_dist_error(self.results, cen_lon=self.cen_lon, cen_lat=self.cen_lat, lon=self.lon, lat=self.lat)
 
     def get_under12_selections(self, age='CENSUS_AGE'):
-        
         return da.get_under12_selections(self.results, age=age)
 
 class Benchmark():
@@ -128,7 +134,7 @@ class Benchmark():
         self.confusion_matrix = None
 
     def set_census(self, census):
-        census = census.loc[:,['CENSUS_MATCH_ADDR', 'CENSUS_X', 'CENSUS_Y']].drop_duplicates()  # select diff variables
+        census = census.loc[:,['CENSUS_MATCH_ADDR', 'CENSUS_Y', 'CENSUS_X']].drop_duplicates()  # select diff variables
         census.loc[census.CENSUS_Y > 1000, 'CENSUS_Y'] = 40.799935
         return census
 
@@ -165,8 +171,68 @@ class Benchmark():
         if self.disambiguated is None:
             raise Exception("Please set disambiguated first")
 
-        self.benchmark_results = da.get_dist_based_match(self.benchmark)['results']
-        #self.confusion_matrix = da.compare_selections(self.disambiguated, self.benchmark_results)['confusion_matrix']
+        self.benchmark_results = da.get_dist_based_match(self.benchmark, lon = "LONG", lat = "LAT")['results']
+        self.confusion_matrix = da.compare_selections(self.disambiguated, self.benchmark_results)['confusion_matrix']
+
+    def get_benchmark(self):
+        return self.benchmark
+
+    def get_benchmark_results(self):
+        if self.benchmark_results is None:
+            raise Exception("Please run benchmarking first")
+        return self.benchmark_results
+
+    def get_confusion_matrix(self):
+        if self.confusion_matrix is None:
+            raise Exception("Please run benchmarking first")
+        return self.confusion_matrix
+
+#version for new run where cd/census information does not need to be joined in
+class Benchmark_v02():
+
+    def __init__(self, match):
+
+        self.match = match
+        self.benchmark = self.create_benchmark()
+
+        #Variables to set
+        self.disambiguated = None
+        self.confidence = None
+
+        #outputs
+        self.benchmark_results = None
+        self.confusion_matrix = None
+
+    def set_disambiguated(self, disambiguated):
+        self.disambiguated = disambiguated
+
+    def set_confidence(self, confidence):
+        self.confidence = confidence
+        # Need to figure out what's going on here
+        self.benchmark['confidence_score'] = self.benchmark['add_match'] #+ self.benchmark[self.confidence]
+
+    def create_benchmark(self):
+        benchmark = self.match.copy()
+
+        #change to use actual street/house numbers once they are sorted out for the census data
+        benchmark['cd_hn'] = benchmark.apply(lambda row: bm.get_hn(row.CD_H_ADDRESS), axis=1)
+        benchmark['cen_hn'] = benchmark.apply(lambda row: bm.get_hn(row.CENSUS_MATCH_ADDR), axis=1)
+        benchmark['cd_add_cln'] = benchmark.apply(lambda row: bm.get_st(row.CD_H_ADDRESS), axis=1)
+        benchmark['cen_add_cln'] = benchmark.apply(lambda row: bm.get_st(row.CENSUS_MATCH_ADDR), axis=1)
+
+        benchmark['add_match'] = np.where(benchmark.cd_hn == benchmark.cen_hn, 0.1, 0) + np.where(
+            benchmark.cen_add_cln == benchmark.cd_add_cln, 0.9, 0)
+
+        return benchmark
+
+    def run_benchmarking(self):
+        if self.confidence is None:
+            raise Exception("Please set confidence first")
+        if self.disambiguated is None:
+            raise Exception("Please set disambiguated first")
+
+        self.benchmark_results = da.get_dist_based_match(self.benchmark, confidence = self.confidence)['results']
+        self.confusion_matrix = da.compare_selections(self.disambiguated, self.benchmark_results)['confusion_matrix']
 
     def get_benchmark(self):
         return self.benchmark

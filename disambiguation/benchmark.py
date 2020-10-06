@@ -3,8 +3,6 @@ import re
 import numpy as np
 import disambiguation.analysis as da
 
-
-
 #Static methods
 
 def get_hn(add):
