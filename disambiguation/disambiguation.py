@@ -3,6 +3,7 @@ import networkx as nx
 import hdbscan
 from itertools import islice
 import disambiguation.processing as dp
+import time
 
 """
 Wrapper function for everything below, including checks
@@ -11,7 +12,7 @@ Works by applying algorithm to specified df (using index i) in the list
 sub_groups: list of dfs, each df being a subset of the census bounded by 2 anchors
 i: index of df in the list
 """
-def apply_algo(sub_groups, i, cluster=True, k_between=True, census_id='CENSUS_ID', census_count="census_count", confidence='confidence_score', lat="LAT", lon="LON", cluster_kwargs={}, path_kwargs={}):
+def apply_algo(sub_groups, i, cluster=True, k_between=True, census_id='CENSUS_ID', census_count="census_count", confidence='confidence_score', lat="CD_X", lon="CD_Y", cluster_kwargs={}, path_kwargs={}):
 
     if i % 1000 == 0:
         print("Reached: " + str(i))
@@ -21,24 +22,26 @@ def apply_algo(sub_groups, i, cluster=True, k_between=True, census_id='CENSUS_ID
 
     if i + 1 < len(sub_groups): # add bottom anchor
         df = pd.concat([df, sub_groups[i+1][0:1]]) 
-    
-    path_df = dp.create_path_df(df, census_id, confidence)
+
+    path_df = dp.create_path_df(df, census_id)
+
 
     if cluster:
         # apply density clustering and remove outlier nodes
         path_df = apply_density_clustering(path_df, lat, lon, **cluster_kwargs)
         cluster_arg = 'in_cluster_x'
-
     else:
         cluster_arg = None
 
     # create graph and k shortest paths centrality
+
     g = dp.create_path_graph(path_df, cluster_col=cluster_arg, lat=lat, lon=lon)
 
     if k_between:
-        output = apply_k_betweenness(path_df, g, **path_kwargs)
+
+        output = apply_k_betweenness(path_df, g, confidence = confidence, **path_kwargs)
     else:
-        output = apply_shortest_path(path_df, g, **path_kwargs)
+        output = apply_shortest_path(path_df, g, confidence = confidence, **path_kwargs)
 
     return output
 
@@ -74,7 +77,7 @@ Returns
     df: df with spatial weights column
     k_paths: paths used for calculation
 """
-def apply_k_betweenness(df, graph, source=None, target=None, k=None, scale=1):
+def apply_k_betweenness(df, graph, confidence = "confidence_score", source=None, target=None, k=None, scale=1):
     if source == None:
         source = list(df["node_ID"])[0]
     if target == None:
@@ -104,7 +107,7 @@ def apply_k_betweenness(df, graph, source=None, target=None, k=None, scale=1):
     spatial_weights = [[key , round(value / k, 2) * scale] for key, value in spatial_weights.items()]
     spatial_df = pd.DataFrame(spatial_weights, columns=["node_ID", 'spatial_weight'])
     df = df.merge(spatial_df, how="inner", on="node_ID", validate="one_to_one")
-    df['spatial_weight'] = df['spatial_weight'] + df['confidence_score']
+    df['spatial_weight'] = df['spatial_weight'] + df[confidence]
 
     return df
 
@@ -124,12 +127,11 @@ Apply density based clustering to detect outliers. Requires `hdbscan` library
 Refer to hdbscan documentation on parameters
 Returns df with a column 'in_cluster' indicating which cluster the nodes are in
 """
-def apply_density_clustering(df, lat='LAT', lon="LONG", min_cluster_size=10, min_samples=10, allow_single_cluster=True, **kwargs):
+def apply_density_clustering(df, lat='CD_X', lon="CD_Y", min_cluster_size=10, min_samples=10, allow_single_cluster=True, **kwargs):
     cluster_sub = df.loc[:, [lon, lat]]
     clusterer = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size, min_samples=min_samples, allow_single_cluster=allow_single_cluster, **kwargs).fit(cluster_sub)
 
     df['in_cluster'] = pd.Series(clusterer.labels_).values
-
     return df
 
 """
@@ -146,7 +148,7 @@ def get_matches(df, cd_id = 'CD_ID', census_id = 'CENSUS_ID', weight = 'spatial_
     b.add_weighted_edges_from(b_edges)
 
     # algorithm is too expensive if we perform it on entire graph. moreover, graph is actually disconnected into sub_graphs. apply algorithm on subgraphs instead
-    subgraphs = list(nx.connected_component_subgraphs(b))
+    subgraphs = [b.subgraph(c) for c in nx.connected_components(b)]
     matches = [list(nx.max_weight_matching(graph, maxcardinality = True)) for graph in subgraphs]
     matches = [sorted(list(item)) for sublist in matches for item in sublist] # unnest and convert pairs from tuple to list
     matches = pd.DataFrame(matches, columns=[cd_id, census_id])
