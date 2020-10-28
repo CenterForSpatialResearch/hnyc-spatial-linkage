@@ -6,6 +6,7 @@ from sklearn.model_selection import StratifiedShuffleSplit
 from category_encoders.target_encoder import TargetEncoder
 import math
 from interpolation import dataprocessing
+from sklearn.model_selection import ShuffleSplit
 
 """
 Purpose: Generate set of dwellings that we could potentially interpolate values for column by fill in
@@ -95,7 +96,30 @@ df: dataframe with census records of interest
 dwelling_col: name of dwelling number column
 y_col: name of column with y data
 """
-def stratified_train_test(df, y, dwelling_col, stratified = True):
+def stratified_train_test(df, y, dwelling_col, stratified = True, k=10):
+
+    ## Stratified for cross validation
+    if k > 1:
+        train_dwellings_list = []
+        if stratified:
+            db = df.loc[:, [dwelling_col, y]].groupby(dwelling_col, as_index=False).first().reset_index(
+                drop=True).copy()
+            for train_index, _ in StratifiedShuffleSplit(n_splits=k, test_size=0.2, random_state=123).split(db[dwelling_col],
+                                                                                                         db[y]):
+                train_dwellings_list.append(db.loc[train_index, dwelling_col])
+        else:
+            dwellings = df[dwelling_col].unique()
+            
+            for train_index, _ in ShuffleSplit(n_splits=k, test_size=0.2, random_state=123).split(dwellings):
+                train_dwellings_list.append(dwellings[train_index])
+        
+        train_list = []
+        test_list = []
+        for dw in train_dwellings_list:
+            train_list.append(df[df[dwelling_col].isin(dw)].copy())
+            test_list.append(df[~df[dwelling_col].isin(dw)].copy())
+        
+        return train_list,test_list
 
     if stratified:
         db = df.loc[:, [dwelling_col, y]].groupby(dwelling_col, as_index=False).first().reset_index(

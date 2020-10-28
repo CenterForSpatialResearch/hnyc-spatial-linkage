@@ -196,8 +196,8 @@ class Interpolator:
     Purpose: Get a train test data, with dwellings only present in one or the other
     Stratified: If true stratify sample, if false, don't
     """
-    def stratified_train_test(self, stratified = True):
-        return interpolation.stratified_train_test(self.df, self.y, self.dwelling_col, stratified)
+    def stratified_train_test(self, stratified = True, k=1):
+        return interpolation.stratified_train_test(self.df, self.y, self.dwelling_col, stratified,k=k)
 
     """
     Purpose: Target encode train, test data
@@ -231,6 +231,24 @@ class Interpolator:
             self.model.fit(tr, train_y)
             self.train_score = self.model.score(tr, train_y)
             self.test_score = self.model.score(te, test_y)
+            
+    def cross_validate_model(self, k=10, stratified=True):
+        
+        train_list, test_list = self.stratified_train_test(k=k, stratified=stratified)
+        self.train_score = []
+        self.test_score = []
+        for i in range(k):
+            tr = train_list[i].loc[:,self.feature_names]
+            tr_y = train_list[i][self.y]
+            te = test_list[i].loc[:, self.feature_names]
+            te_y = test_list[i][self.y]
+#             print(tr.shape, tr_y.shape, te.shape, te_y.shape)
+#             print(self.model)
+            self.model.fit(tr, tr_y)
+            self.train_score.append(self.model.score(tr, tr_y))
+            self.test_score.append(self.model.score(te, te_y))
+#         self.temp_train_list = train_list ## Check for info leak in cross validation
+#         self.temp_test_list = test_list ## Check for info leak in cross validation
 
     """
     Purpose: Use model for predicting values after training
