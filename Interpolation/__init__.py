@@ -8,6 +8,8 @@ import interpolation.sequences as sequences
 import interpolation.dataprocessing as dataprocessing
 from functools import reduce
 
+from kmodes.kmodes import KModes
+
 #Store and modify census data post disambiguation and dwelling fillin/conflict resolution
 class CensusData:
 
@@ -249,6 +251,8 @@ class Interpolator:
             self.test_score.append(self.model.score(te, te_y))
 #         self.temp_train_list = train_list ## Check for info leak in cross validation
 #         self.temp_test_list = test_list ## Check for info leak in cross validation
+        self.last_te = te
+        self.last_te_y = te_y
 
     """
     Purpose: Use model for predicting values after training
