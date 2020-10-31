@@ -394,6 +394,7 @@ class CentroidInterpolator(Interpolator):
     Purpose: Handle instability in kmeans results by saving the best model and best score after 100 runs
     n: number of clusters
     *Note assumes model is a pipeline that includes preprocessing
+    * 10/31: change to CV when evaluate best k
     """
     def kmeans_best(self, n):
 
@@ -404,14 +405,17 @@ class CentroidInterpolator(Interpolator):
         for i in range(100):
 
             self.apply_clustering()
-            train, test = self.stratified_train_test()
-            self.train_test_model(train, test)
+            self.cross_validate_model()
+            
+            
+#             train, test = self.stratified_train_test()
+#             self.train_test_model(train, test)
 
-            if self.test_score > score:
-                score = self.test_score
+            if np.mean(self.test_score) > score:
+                score = np.mean(self.test_score) 
                 best_clusterer = deepcopy(self.clustering_algo)
 
-            if i % 50 == 0:
+            if (i+1) % 10 == 0:
                 print("n is {} and it's the {}th iteration".format(n, i))
 
         return score, best_clusterer
