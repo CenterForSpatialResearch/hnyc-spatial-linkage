@@ -416,7 +416,7 @@ class CentroidInterpolator(Interpolator):
                 best_clusterer = deepcopy(self.clustering_algo)
 
             if (i+1) % 10 == 0:
-                print("n is {} and it's the {}th iteration".format(n, i))
+                print("n is {} and it's the {}th iteration".format(n, i+1))
 
         return score, best_clusterer
 
