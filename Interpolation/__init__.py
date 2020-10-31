@@ -9,6 +9,7 @@ import interpolation.dataprocessing as dataprocessing
 from functools import reduce
 
 from kmodes.kmodes import KModes
+from sklearn.compose import ColumnTransformer
 
 #Store and modify census data post disambiguation and dwelling fillin/conflict resolution
 class CensusData:
@@ -170,6 +171,26 @@ class CensusData:
     def no_seq(self):
         self.df = self.data
 
+    """
+    Purpose: group records based on their similarity in certain columns
+    sim_columns: List of column names that will be used to measure the similarity
+    """
+    def apply_similarity(self, sim_columns, k=20):
+        
+        ## take only columns to be clustered
+        ## unknown values are treated as a new category
+        similarity_df = self.df[sim_columns].copy()
+        similarity_df.fillna(value=-1, inplace=True)
+        
+        ## process data fro Kmodes. Convert all columns into string
+        for c in sim_columns:
+            similarity_df[c] = similarity_df[c].astype('str')
+            
+        kmodes_model = KModes(n_clusters=k, init = "Cao", n_init = 1, verbose=1)
+        kmodes_pred = kmodes_model.fit_predict(similarity_df, 
+                                                   categorical=[similarity_df.columns.get_loc(c) for c in sim_columns])
+        
+        self.df['similarity_label'] = kmodes_pred
 
 #Base class for interpolation, not meant to be instantiated
 class Interpolator:
@@ -401,7 +422,5 @@ class CentroidInterpolator(Interpolator):
     """
     def set_clustering_algo(self, clustering_algo):
         self.clustering_algo = clustering_algo
-
-
 
 
