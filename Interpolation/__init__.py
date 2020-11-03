@@ -240,17 +240,17 @@ class Interpolator:
     def train_test_model(self, train, test, train_y = None, test_y = None):
 
         if train_y is None:
-            tr = train.loc[:,self.feature_names]
+            tr = train#.loc[:,self.feature_names + ['block_num']] ## block_num for later ref. Actually dropped when .fit()
             tr_y = train[self.y]
-            te = test.loc[:, self.feature_names]
+            te = test#.loc[:, self.feature_names + ['block_num']]
             te_y = test[self.y]
             self.model.fit(tr, tr_y)
             self.train_score = self.model.score(tr, tr_y)
             self.test_score = self.model.score(te, te_y)
 
         else:
-            tr = train.loc[:, self.feature_names]
-            te = train.loc[:, self.feature_names]
+            tr = train#.loc[:, self.feature_names+ ['block_num']]
+            te = train#.loc[:, self.feature_names+ ['block_num']]
             self.model.fit(tr, train_y)
             self.train_score = self.model.score(tr, train_y)
             self.test_score = self.model.score(te, test_y)
@@ -261,9 +261,9 @@ class Interpolator:
         self.train_score = []
         self.test_score = []
         for i in range(k):
-            tr = train_list[i].loc[:,self.feature_names]
+            tr = train_list[i]#.loc[:,self.feature_names+ ['block_num']]
             tr_y = train_list[i][self.y]
-            te = test_list[i].loc[:, self.feature_names]
+            te = test_list[i]#.loc[:, self.feature_names+ ['block_num']]
             te_y = test_list[i][self.y]
 #             print(tr.shape, tr_y.shape, te.shape, te_y.shape)
 #             print(self.model)
@@ -402,7 +402,7 @@ class CentroidInterpolator(Interpolator):
 
         score = 0
         best_clusterer = None
-        for i in range(100):
+        for i in range(50):
 
             self.apply_clustering()
             self.cross_validate_model()
