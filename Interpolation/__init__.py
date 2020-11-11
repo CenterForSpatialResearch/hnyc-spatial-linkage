@@ -45,21 +45,7 @@ class CensusData:
         dwellings_cols = dwellings.groupby(self.ward_col, as_index=False).apply(
             lambda x: sequences.col_for_seq(x, X=self.x_col, Y=self.y_col))
         dwellings_cols = dwellings_cols.groupby(self.ward_col, as_index=False).apply(
-            lambda x: sequences.get_dist_seq(x, d))
-        
-#         ## [11.11.20] filling unknown records between 2 known records of the same sequence
-#         min_dwelling_id = min(self.data[self.dwelling_col])
-#         max_dwelling_id = max(self.data[self.dwelling_col])
-#         dwelling_id_df = pd.DataFrame({self.dwelling_col: range(min_dwelling_id, max_dwelling_id+1)})
-
-#         dwellings_cols = dwellings_cols.merge(dwelling_id_df, on=self.dwelling_col, how='right')
-#         dwellings_cols.sort_values(self.dwelling_col, inplace=True)
-#         dwellings_cols.reset_index(inplace=True)
-#         dwellings_cols['ffill'] = dwellings_cols['sequence_id'].ffill()
-#         dwellings_cols['bfill'] = dwellings_cols['sequence_id'].bfill()
-#         dwellings_cols['sequence_id'] = np.where(dwellings_cols['ffill'] == dwellings_cols['bfill'], dwellings_cols['bfill'], dwellings_cols['sequence_id'])
-# #         dwellings_dist.drop(columns=['ffill', 'bfill'], inplace=True)
-            
+            lambda x: sequences.get_dist_seq(x, d))          
             
         return dwellings_cols.loc[:, [self.ward_col, self.dwelling_col, "sequence_id", "num_between",
                                               "sequence_order_enum", "dist", "sequence_len"]].copy()
@@ -161,9 +147,11 @@ class CensusData:
         self.df = reduce(lambda x, y: pd.merge(x, y, how = "left", on = [self.ward_col, self.dwelling_col]), sequences_dfs, self.data)
 
         ## fill within for distance sequence
-        self.df = self.df.groupby(self.ward_col, as_index=False).apply(lambda x: self.fill_within(x, self.dwelling_col, 'sequence_id'))
+        if distance:
+            self.df = self.df.groupby(self.ward_col, as_index=False).apply(lambda x: self.fill_within(x, self.dwelling_col, 'sequence_id'))
         
         if enumerator_dist:
+            self.df = self.df.groupby(self.ward_col, as_index=False).apply(lambda x: self.fill_within(x, self.dwelling_col, 'enum_dist_id'))
             self.df = self.df.dropna(subset = [self.pagenum])
         
     """
