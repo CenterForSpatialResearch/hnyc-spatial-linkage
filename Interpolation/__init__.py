@@ -161,7 +161,7 @@ class CensusData:
         self.df = reduce(lambda x, y: pd.merge(x, y, how = "left", on = [self.ward_col, self.dwelling_col]), sequences_dfs, self.data)
 
         ## fill within for distance sequence
-        self.df = self.fill_within(self.df, self.dwelling_col, 'sequence_id')
+        self.df = self.df.groupby(self.ward_col, as_index=False).apply(lambda x: self.fill_within(x, self.dwelling_col, 'sequence_id'))
         
         if enumerator_dist:
             self.df = self.df.dropna(subset = [self.pagenum])
