@@ -46,9 +46,41 @@ class CensusData:
             lambda x: sequences.col_for_seq(x, X=self.x_col, Y=self.y_col))
         dwellings_cols = dwellings_cols.groupby(self.ward_col, as_index=False).apply(
             lambda x: sequences.get_dist_seq(x, d))
+        
+#         ## [11.11.20] filling unknown records between 2 known records of the same sequence
+#         min_dwelling_id = min(self.data[self.dwelling_col])
+#         max_dwelling_id = max(self.data[self.dwelling_col])
+#         dwelling_id_df = pd.DataFrame({self.dwelling_col: range(min_dwelling_id, max_dwelling_id+1)})
+
+#         dwellings_cols = dwellings_cols.merge(dwelling_id_df, on=self.dwelling_col, how='right')
+#         dwellings_cols.sort_values(self.dwelling_col, inplace=True)
+#         dwellings_cols.reset_index(inplace=True)
+#         dwellings_cols['ffill'] = dwellings_cols['sequence_id'].ffill()
+#         dwellings_cols['bfill'] = dwellings_cols['sequence_id'].bfill()
+#         dwellings_cols['sequence_id'] = np.where(dwellings_cols['ffill'] == dwellings_cols['bfill'], dwellings_cols['bfill'], dwellings_cols['sequence_id'])
+# #         dwellings_dist.drop(columns=['ffill', 'bfill'], inplace=True)
+            
+            
         return dwellings_cols.loc[:, [self.ward_col, self.dwelling_col, "sequence_id", "num_between",
                                               "sequence_order_enum", "dist", "sequence_len"]].copy()
 
+    """
+    fill sequences of unknown records that are in between 2 known records of the same sequence
+    """
+    def fill_within(self, df, dwelling_col, seq_col):
+        min_dwelling_id = min(df[dwelling_col])
+        max_dwelling_id = max(df[dwelling_col])
+        dwelling_id_df = pd.DataFrame({dwelling_col: range(min_dwelling_id, max_dwelling_id+1)})
+
+        dwellings_cols = df.merge(dwelling_id_df, on=dwelling_col, how='right')
+        dwellings_cols.sort_values(dwelling_col, inplace=True)
+        dwellings_cols.reset_index(inplace=True)
+        dwellings_cols['ffill'] = dwellings_cols[seq_col].ffill()
+        dwellings_cols['bfill'] = dwellings_cols[seq_col].bfill()
+        dwellings_cols[seq_col] = np.where(dwellings_cols['ffill'] == dwellings_cols['bfill'], dwellings_cols['bfill'], dwellings_cols[seq_col])
+        dwellings_cols.drop(columns=['ffill', 'bfill'], inplace=True)
+        return dwellings_cols
+        
     """
     Purpose: Create dataframe of all census records with sequences added in
     d: Maximum distance between dwellings within the same sequence
@@ -103,7 +135,7 @@ class CensusData:
     def apply_sequencing(self, d = 0.1, n = 40, distance = False, fixed = False, dwelling = False, enumerator = False,tuned = False, enumerator_dist = False):
         sequences_dfs = []
         if distance:
-            dwellings_dist = tuned if tuned else self.get_dwellings_dist_seq(d)
+            dwellings_dist = tuned if tuned else self.get_dwellings_dist_seq(d)            
             sequences_dfs.append(dwellings_dist)
 
         if fixed:
@@ -128,9 +160,12 @@ class CensusData:
 
         self.df = reduce(lambda x, y: pd.merge(x, y, how = "left", on = [self.ward_col, self.dwelling_col]), sequences_dfs, self.data)
 
+        ## fill within for distance sequence
+        self.df = self.fill_within(self.df, self.dwelling_col, 'sequence_id')
+        
         if enumerator_dist:
             self.df = self.df.dropna(subset = [self.pagenum])
-
+        
     """
     Purpose: Get sequences of dwellings visited by given enumerator in a single day
     enum_num: column name of census enumerator label
