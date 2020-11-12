@@ -197,23 +197,30 @@ class CensusData:
     """
     Purpose: group records based on their similarity in certain columns
     sim_columns: List of column names that will be used to measure the similarity
+    
+    The current self.df must contain only 1 ward
     """
     def apply_similarity(self, sim_columns, k=20):
         
+        dwellings = self.df.groupby([self.ward_col, self.dwelling_col], as_index = False).first()#.copy()
+        similarity_df = dwellings[sim_columns+[self.dwelling_col]].copy()
+        similarity_df.fillna(value=-1, inplace=True)
         ## take only columns to be clustered
         ## unknown values are treated as a new category
-        similarity_df = self.df[sim_columns].copy()
-        similarity_df.fillna(value=-1, inplace=True)
+#         similarity_df = self.df[sim_columns].copy()
+#         similarity_df.fillna(value=-1, inplace=True)
         
         ## process data fro Kmodes. Convert all columns into string
         for c in sim_columns:
             similarity_df[c] = similarity_df[c].astype('str')
             
         kmodes_model = KModes(n_clusters=k, init = "Cao", n_init = 1, verbose=1)
-        kmodes_pred = kmodes_model.fit_predict(similarity_df, 
+        kmodes_pred = kmodes_model.fit_predict(similarity_df[sim_columns], 
                                                    categorical=[similarity_df.columns.get_loc(c) for c in sim_columns])
         
-        self.df['similarity_label'] = kmodes_pred
+        similarity_df['similarity_label'] = kmodes_pred
+        similarity_df.drop(columns=sim_columns, inplace=True)
+        self.df = self.df.merge(similarity_df, how = "left", on = self.dwelling_col)
 
 #Base class for interpolation, not meant to be instantiated
 class Interpolator:
