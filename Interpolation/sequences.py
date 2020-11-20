@@ -34,7 +34,8 @@ df: dataframe containing unique dwellings
 d: maximum distance between dwellings, anything larger than this means a sequence break
 returns: dataframe
 """
-def get_dist_seq(df, d):
+def get_dist_seq_after(df, d):
+    print('d: ', d)
     df = df.copy()
     df["sequence_id"] = np.where(df["dist"] > d, df["dist"].index, np.nan)
     df["sequence_id"].iloc[-1] = df.tail(1).index[0]
@@ -58,28 +59,29 @@ def get_dist_seq(df, d):
     df["sequence_order_enum"] = df.apply(lambda row: sequence_map[row["sequence_id"]], axis = 1)
     return df
 
-# def get_dist_seq(df, d):
-#     df = df.copy()
-#     df["sequence_id"] = np.where(df["dist"] > d, df["dist"].index, np.nan)
-#     df["sequence_id"].bfill(inplace = True)
+def get_dist_seq(df, d):
+    print('d: ', d)
+    df = df.copy()
+    df["sequence_id"] = np.where(df["dist"] > d, df["dist"].index, np.nan)
+    df["sequence_id"].bfill(inplace = True)
 
-#     #deal with last dwelling
-#     try:
-#         if df["dist"].iloc[-2] > d:
-#             df["sequence_id"].iloc[-1] = df.tail(1).index[0]
-#         else:
-#             df["sequence_id"].ffill(inplace = True)
-#     except:
-#         df["sequence_id"] = df.iloc[0].index[0]
+    #deal with last dwelling
+    try:
+        if df["dist"].iloc[-2] > d:
+            df["sequence_id"].iloc[-1] = df.tail(1).index[0]
+        else:
+            df["sequence_id"].ffill(inplace = True)
+    except:
+        df["sequence_id"] = df.iloc[0].index[0]
 
-#     #handle if every distance in ward is less that d
-#     if df["sequence_id"].isnull().all():
-#         df["sequence_id"] = df.tail(1).index[0]
+    #handle if every distance in ward is less that d
+    if df["sequence_id"].isnull().all():
+        df["sequence_id"] = df.tail(1).index[0]
 
-#     df["sequence_len"] = df.groupby("sequence_id")["num_between"].transform('sum')
-#     sequence_map = {ids:num for ids, num in zip(df["sequence_id"].unique(), range(len(df["sequence_id"].unique())))}
-#     df["sequence_order_enum"] = df.apply(lambda row: sequence_map[row["sequence_id"]], axis = 1)
-#     return df
+    df["sequence_len"] = df.groupby("sequence_id")["num_between"].transform('sum')
+    sequence_map = {ids:num for ids, num in zip(df["sequence_id"].unique(), range(len(df["sequence_id"].unique())))}
+    df["sequence_order_enum"] = df.apply(lambda row: sequence_map[row["sequence_id"]], axis = 1)
+    return df
 
 """
 Purpose: Tunes selection of maximum distance between known consecutive sequences, but minimizing the difference in sequence
