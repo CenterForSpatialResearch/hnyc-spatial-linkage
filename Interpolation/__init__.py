@@ -51,17 +51,17 @@ class CensusData:
         return dwellings_cols.loc[:, [self.ward_col, self.dwelling_col, "sequence_id", "num_between",
                                               "sequence_order_enum", "dist", "sequence_len"]].copy()
     
-    def get_dwellings_dist_seq_after(self, d):
-        print('d: ', d)
-        dwellings = self.get_dwellings()
-        dwellings.dropna(subset = [self.block_col], inplace = True)
-        dwellings_cols = dwellings.groupby(self.ward_col, as_index=False).apply(
-            lambda x: sequences.col_for_seq(x, X=self.x_col, Y=self.y_col))
-        dwellings_cols = dwellings_cols.groupby(self.ward_col, as_index=False).apply(
-            lambda x: sequences.get_dist_seq_after(x, d))          
+#     def get_dwellings_dist_seq_after(self, d):
+#         print('d: ', d)
+#         dwellings = self.get_dwellings()
+#         dwellings.dropna(subset = [self.block_col], inplace = True)
+#         dwellings_cols = dwellings.groupby(self.ward_col, as_index=False).apply(
+#             lambda x: sequences.col_for_seq(x, X=self.x_col, Y=self.y_col))
+#         dwellings_cols = dwellings_cols.groupby(self.ward_col, as_index=False).apply(
+#             lambda x: sequences.get_dist_seq_after(x, d))          
             
-        return dwellings_cols.loc[:, [self.ward_col, self.dwelling_col, "sequence_id", "num_between",
-                                              "sequence_order_enum", "dist", "sequence_len"]].copy()
+#         return dwellings_cols.loc[:, [self.ward_col, self.dwelling_col, "sequence_id", "num_between",
+#                                               "sequence_order_enum", "dist", "sequence_len"]].copy()
 
 #     """
 #     fill sequences of unknown records that are in between 2 known records of the same sequence
@@ -131,14 +131,11 @@ class CensusData:
     enumerator_dist: distance based sequences, built within enumerator sequences (rather than simply within wards)
     sets self.df to a dataframe with specified sequences and all census records
     """
-    def apply_sequencing(self, after, d = 0.1, n = 40, distance = False, fixed = False, dwelling = False, enumerator = False,tuned = False, enumerator_dist = False):
+    def apply_sequencing(self, d = 0.1, n = 40, distance = False, fixed = False, dwelling = False, enumerator = False,tuned = False, enumerator_dist = False):
         print('d: ', d)
         sequences_dfs = []
         if distance:
-            if after:
-                dwellings_dist = tuned if tuned else self.get_dwellings_dist_seq_after(d)    
-            else:
-                dwellings_dist = tuned if tuned else self.get_dwellings_dist_seq(d)            
+            dwellings_dist = tuned if tuned else self.get_dwellings_dist_seq(d)            
             sequences_dfs.append(dwellings_dist)
 
         if fixed:
@@ -155,11 +152,7 @@ class CensusData:
             dwellings_dist.dropna(subset=[self.block_col], inplace=True)
             dwellings_dist = dwellings_dist.groupby("enum_seq", as_index=False).apply(
                 lambda x: sequences.col_for_seq(x, X=self.x_col, Y=self.y_col))
-            if after:
-                dwellings_dist = dwellings_dist.groupby("enum_seq", as_index=False).apply(
-                    lambda x: sequences.get_dist_seq_after(x, d))
-            else:
-                dwellings_dist = dwellings_dist.groupby("enum_seq", as_index=False).apply(
+            dwellings_dist = dwellings_dist.groupby("enum_seq", as_index=False).apply(
                 lambda x: sequences.get_dist_seq(x, d))
 
             dwellings_dist.rename(columns = {"sequence_id":"enum_dist_id", "sequence_order_enum":"enum_dist_order", "dist":"enum_dist", "sequence_len":"enum_sequence_len"}, inplace = True)
