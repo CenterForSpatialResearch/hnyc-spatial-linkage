@@ -11,7 +11,8 @@ from sklearn.model_selection import ShuffleSplit
 """
 Purpose: Generate set of dwellings that we could potentially interpolate values for column by fill in
 dwellings_df: dataframe with unique dwellings with known addresses/blocks
-returns: dataframe with numb_between_real column, and only dwellings that fulfill criteria
+returns: dataframe with numb_between_real column of only dwellings that have the same `column` value as
+        the next dwelling and have some unknow dwelling between.
 """
 def same_next(dwellings_df, column = "BLOCK_NUM"):
     dwellings_df = dwellings_df.copy()
@@ -19,6 +20,7 @@ def same_next(dwellings_df, column = "BLOCK_NUM"):
     dwellings_df = dwellings_df[dwellings_df[str(column) + "_next"] == dwellings_df[column]]
     dwellings_df["num_between_real"] = dwellings_df["num_between"] - 1
     dwellings_df = dwellings_df[dwellings_df["num_between_real"] != 0]
+    dwellings_df['header'] = 1
     return dwellings_df
 
 """
@@ -35,6 +37,7 @@ Purpose: Get dwellings with relevant columns for fill in
 df: dataframe with all dwellings, with sequence information
 column: column to seek consecutive value
 returns: dataframes with relevant dwellings for fillin, and the values they would be filled in with
+[11/23 Note: return df of consecutive dwellings between two known dwellings of the same block#, inclusive]
 """
 def get_consecutive_dwellings(df, column = "BLOCK_NUM"):
 
@@ -45,7 +48,7 @@ def get_consecutive_dwellings(df, column = "BLOCK_NUM"):
     dataframes = []
     find = None
     for row in df.itertuples():
-        if row.Known == 1:
+        if row.header == 1:
             index_start = row.Index
             find = getattr(row, next_col)
 

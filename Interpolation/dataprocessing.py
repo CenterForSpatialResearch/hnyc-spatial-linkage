@@ -20,8 +20,8 @@ cols: list of column names to include from dwellings level dataset
 joins: list of columns to perform the join on
 return: dataframe of all census with dwellings info
 """
-def dwellings_to_all(all, dwellings, cols, joins):
-    df = all.merge(dwellings.loc[:,cols], how = "left", on = joins, validate = 'many_to_one')
+def dwellings_to_all(all_df, dwellings, cols, joins):
+    df = all_df.merge(dwellings.loc[:,cols], how = "left", on = joins, validate = 'many_to_one')
     return df
 
 """
@@ -31,7 +31,7 @@ known_dwellings: dataframe with known_dwellings
 returns: dataframe with all dwellings, with sequence ids, order_enum, order
 """
 def all_dwellings_sequenced(all_dwellings, known_dwellings, ward_col = "CENSUS_WARD_NUM", dwelling_col = "CENSUS_DWELLING_NUM"):
-    known_dwellings["Known"] = 1
+#     known_dwellings["Known"] = 1
     prediction_data = dwellings_to_all(all_dwellings, known_dwellings, list(
         set(list(known_dwellings.columns)).difference(list(all_dwellings.columns))) + [ward_col,
                                                                                        dwelling_col],
