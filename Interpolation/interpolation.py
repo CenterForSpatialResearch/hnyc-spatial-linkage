@@ -54,7 +54,9 @@ def get_consecutive_dwellings(df, column = "BLOCK_NUM"):
 
         elif find is not None and find == getattr(row, column):
             index_end = row.Index + 1
-            dataframes.append(df.iloc[index_start:index_end])
+            consec_dwellings = df.iloc[index_start:index_end].copy()
+            consec_dwellings['consecutive_dwelling_id'] = index_start
+            dataframes.append(consec_dwellings)
             find = None
 
     return pd.concat(dataframes)
