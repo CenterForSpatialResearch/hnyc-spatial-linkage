@@ -26,7 +26,8 @@ def same_next(dwellings_df, column = "BLOCK_NUM"):
 """
 Purpose: limit number of dwellings in between known values for fill in
 df: dataframe with num_between_real column filled in for all dwellings
-limit: 
+limit: The number of unknwon dwellings in between that is allowed
+11/24 df must be batches of consecutive dwellings that share the same `num_between_real`
 """
 def limit_dwellings_between(df, limit):
     df["num_between_real"] =  df["num_between_real"].ffill()

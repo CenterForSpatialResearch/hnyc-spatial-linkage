@@ -49,7 +49,8 @@ returns: dataframe with all dwellings, with sequence ids, order_enum, order
 """
 def all_dwellings_sequenced(all_dwellings, known_dwellings, block_col, fill_column, 
                             ward_col = "CENSUS_WARD_NUM", 
-                            dwelling_col = "CENSUS_DWELLING_NUM"):
+                            dwelling_col = "CENSUS_DWELLING_NUM",
+                            dwelling_max=None):
 #     known_dwellings["Known"] = 1
     ## join all dwellings and known dwellings together
     prediction_data = dwellings_to_all(all_dwellings, known_dwellings, list(
@@ -62,6 +63,9 @@ def all_dwellings_sequenced(all_dwellings, known_dwellings, block_col, fill_colu
     cons_dwellings = interpolation.get_consecutive_dwellings(prediction_data, column = block_col) 
     
     #### 2. if rows are also in between the same sequence, fill in the sequence
+    ## dwelling_max is set, only interpolate those that fulfill.
+    if dwelling_max is not None:
+        cons_dwellings = interpolation.limit_dwellings_between(cons_dwellings, dwelling_max)
     interpolated_unknown = cons_dwellings.groupby('consecutive_dwelling_id').apply(fill_in, fill_column)
     interpolated_unknown.drop(columns='consecutive_dwelling_id', inplace=True)
     
@@ -82,7 +86,7 @@ def all_dwellings_sequenced(all_dwellings, known_dwellings, block_col, fill_colu
     prediction_data.drop(columns=[fill_column+'_x', fill_column+'_y'], inplace=True)
     
 
-    return prediction_data
+    return prediction_data, interpolated_unknown
 
 """
 Purpose: generate dwelling id that's unique for every dwelling
