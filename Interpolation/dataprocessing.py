@@ -35,9 +35,9 @@ df: df of dwellings whose first and last rows are known dwellings. Must contain 
 check_column: column to check for the start and end values and to fill in. This is intended
     to be sequence column.
 """
-def fill_in(df, check_column):
+def fill_in(df, fill_column, check_column):
     if df[check_column].values[0] == df[check_column].values[-1]:
-        df[check_column] = df[check_column].ffill()
+        df[fill_column] = df[fill_column].ffill()
     return df
 
 
@@ -45,9 +45,11 @@ def fill_in(df, check_column):
 Purpose: Combine dwellings with addresses, with added sequences and all dwellings
 all_dwellings: dataframe with all dwellings
 known_dwellings: dataframe with known_dwellings
+fill_column: columns to be fill in. Usually, sequence columns
+check_column: columns to check for fill in. Usually, the same as fill_column
 returns: dataframe with all dwellings, with sequence ids, order_enum, order
 """
-def all_dwellings_sequenced(all_dwellings, known_dwellings, block_col, fill_column, 
+def all_dwellings_sequenced(all_dwellings, known_dwellings, block_col, fill_column, check_column,
                             ward_col = "CENSUS_WARD_NUM", 
                             dwelling_col = "CENSUS_DWELLING_NUM",
                             dwelling_max=None):
@@ -66,7 +68,7 @@ def all_dwellings_sequenced(all_dwellings, known_dwellings, block_col, fill_colu
     ## dwelling_max is set, only interpolate those that fulfill.
     if dwelling_max is not None:
         cons_dwellings = interpolation.limit_dwellings_between(cons_dwellings, dwelling_max)
-    interpolated_unknown = cons_dwellings.groupby('consecutive_dwelling_id').apply(fill_in, fill_column)
+    interpolated_unknown = cons_dwellings.groupby('consecutive_dwelling_id').apply(fill_in, fill_column, check_column)
     interpolated_unknown.drop(columns='consecutive_dwelling_id', inplace=True)
     
 #     prediction_data["sequence_order_enum"] = prediction_data["sequence_order_enum"].ffill()  <<< should be put in fill_in()
@@ -86,7 +88,7 @@ def all_dwellings_sequenced(all_dwellings, known_dwellings, block_col, fill_colu
     prediction_data.drop(columns=[fill_column+'_x', fill_column+'_y'], inplace=True)
     
 
-    return prediction_data, interpolated_unknown
+    return prediction_data
 
 """
 Purpose: generate dwelling id that's unique for every dwelling
