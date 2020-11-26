@@ -49,16 +49,19 @@ def get_consecutive_dwellings(df, column = "BLOCK_NUM"):
     dataframes = []
     find = None
     for row in df.itertuples():
-        if row.header == 1:
+        if find is None and row.header == 1: ## start
             index_start = row.Index
             find = getattr(row, next_col)
-
-        elif find is not None and find == getattr(row, column):
+        elif find is not None and find == getattr(row, column): ## end
             index_end = row.Index + 1
             consec_dwellings = df.iloc[index_start:index_end].copy()
             consec_dwellings['consecutive_dwelling_id'] = index_start
             dataframes.append(consec_dwellings)
             find = None
+            
+            if row.header == 1:  ## if it is also a start in addition to the end
+                index_start = row.Index
+                find = getattr(row, next_col)            
 
     return pd.concat(dataframes)
 

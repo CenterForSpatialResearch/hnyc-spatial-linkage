@@ -36,7 +36,14 @@ check_column: column to check for the start and end values and to fill in. This 
     to be sequence column.
 """
 def fill_in(df, fill_column, check_column):
-    if df[check_column].values[0] == df[check_column].values[-1]:
+    fill = True
+    if not isinstance(check_column, list):
+        raise TypeError("name 'check_column' must be list.")
+    for col in check_column:
+        if df[col].values[0] != df[col].values[-1]:
+            fill = False
+            break
+    if fill:
         df[fill_column] = df[fill_column].ffill()
     return df
 
@@ -70,6 +77,8 @@ def all_dwellings_sequenced(all_dwellings, known_dwellings, block_col, fill_colu
         cons_dwellings = interpolation.limit_dwellings_between(cons_dwellings, dwelling_max)
     interpolated_unknown = cons_dwellings.groupby('consecutive_dwelling_id').apply(fill_in, fill_column, check_column)
     interpolated_unknown.drop(columns='consecutive_dwelling_id', inplace=True)
+    
+    interpolated_unknown.drop_duplicates(inplace=True) ## dwellings that start and end will be removed
     
 #     prediction_data["sequence_order_enum"] = prediction_data["sequence_order_enum"].ffill()  <<< should be put in fill_in()
 #     prediction_data = prediction_data.groupby("sequence_id").apply(sequences.sequence_order) <<< do not know what this is 11.24
