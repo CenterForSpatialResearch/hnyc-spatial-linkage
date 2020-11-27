@@ -30,7 +30,7 @@ limit: The number of unknwon dwellings in between that is allowed
 11/24 df must be batches of consecutive dwellings that share the same `num_between_real`
 """
 def limit_dwellings_between(df, limit):
-    df["num_between_real"] =  df["num_between_real"].ffill()
+    df["num_between_real"] = df["num_between_real"].ffill()
     return df[df["num_between_real"] <= limit].copy()
 
 """
