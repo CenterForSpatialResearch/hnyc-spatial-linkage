@@ -150,9 +150,9 @@ class CensusData:
         if enumerator_dist:
             dwellings_dist = self.get_enum_seq(all = True)
             dwellings_dist.dropna(subset=[self.block_col], inplace=True)
-            dwellings_dist = dwellings_dist.groupby("enum_seq", as_index=False).apply(
+            dwellings_dist = dwellings_dist.groupby([self.ward_col, "enum_seq"], as_index=False).apply(
                 lambda x: sequences.col_for_seq(x, X=self.x_col, Y=self.y_col))
-            dwellings_dist = dwellings_dist.groupby("enum_seq", as_index=False).apply(
+            dwellings_dist = dwellings_dist.groupby([self.ward_col, "enum_seq"], as_index=False).apply(
                 lambda x: sequences.get_dist_seq(x, d))
 
             dwellings_dist.rename(columns = {"sequence_id":"enum_dist_id", "sequence_order_enum":"enum_dist_order", "dist":"enum_dist", "sequence_len":"enum_sequence_len"}, inplace = True)
@@ -178,7 +178,7 @@ class CensusData:
         dwellings = self.get_dwellings()
         with_labels = []
         enum_label = 1
-        for id, df_org in dwellings.groupby([enum_num, date]):
+        for id, df_org in dwellings.groupby([self.ward_col, enum_num, date]):
             df = df_org.copy()
             df["enum_seq"] = enum_label
             enum_label += 1
