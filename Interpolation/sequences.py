@@ -35,7 +35,7 @@ d: maximum distance between dwellings, anything larger than this means a sequenc
 returns: dataframe
 """
 def get_dist_seq(df, d):
-    print('d: ', d)
+#     print('d: ', d)
     df = df.copy()
     df["sequence_id"] = np.where(df["dist"] > d, df["dist"].index, np.nan)
     df["sequence_id"].iloc[-1] = df.tail(1).index[0]

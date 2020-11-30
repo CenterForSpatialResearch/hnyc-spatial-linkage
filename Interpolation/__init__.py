@@ -40,7 +40,7 @@ class CensusData:
     returns: sequences added to dwelling data
     """
     def get_dwellings_dist_seq(self, d):
-        print('d: ', d)
+#         print('d: ', d)
         dwellings = self.get_dwellings()
         dwellings.dropna(subset = [self.block_col], inplace = True)
         dwellings_cols = dwellings.groupby(self.ward_col, as_index=False).apply(
