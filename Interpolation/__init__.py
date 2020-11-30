@@ -8,7 +8,7 @@ import interpolation.sequences as sequences
 import interpolation.dataprocessing as dataprocessing
 from functools import reduce
 
-from kmodes.kmodes import KModes
+from kmodes.kprototypes import KPrototypes
 from sklearn.compose import ColumnTransformer
 
 #Store and modify census data post disambiguation and dwelling fillin/conflict resolution
@@ -214,26 +214,46 @@ class CensusData:
     
     The current self.df must contain only 1 ward
     """
-    def apply_similarity(self, sim_columns, k=20):
+    def apply_similarity(self, kpro_model, cate_sim_columns, cont_sim_columns=[]):
+        
+        if not isinstance(cate_sim_columns, list):
+            raise TypeError("'cate_sim_columns' must be a list")
+            
+        if not isinstance(cont_sim_columns, list):
+            raise TypeError("'cont_sim_columns' must be a list")
+            
+        if 'similarity_label' in self.df.columns:
+            self.df.drop(columns=['similarity_label'], inplace=True)
         
         dwellings = self.df.groupby([self.ward_col, self.dwelling_col], as_index = False).first()#.copy()
-        similarity_df = dwellings[sim_columns+[self.dwelling_col]].copy()
+        similarity_df = dwellings[cate_sim_columns + cont_sim_columns + [self.dwelling_col]].copy()
+        
+        ## fill in sequence_order
+        if 'sequence_order_enum' in cont_sim_columns:
+            similarity_df.loc[0, 'sequence_order_enum'] = -1
+            similarity_df['sequence_order_enum'] = similarity_df['sequence_order_enum'].ffill()
+        
         similarity_df.fillna(value=-1, inplace=True)
+        
         ## take only columns to be clustered
         ## unknown values are treated as a new category
 #         similarity_df = self.df[sim_columns].copy()
 #         similarity_df.fillna(value=-1, inplace=True)
         
-        ## process data fro Kmodes. Convert all columns into string
-        for c in sim_columns:
+        ## process data for Kmodes. Convert cate columns into string
+        for c in cate_sim_columns:
             similarity_df[c] = similarity_df[c].astype('str')
             
-        kmodes_model = KModes(n_clusters=k, init = "Cao", n_init = 1, verbose=1)
-        kmodes_pred = kmodes_model.fit_predict(similarity_df[sim_columns], 
-                                                   categorical=[similarity_df.columns.get_loc(c) for c in sim_columns])
+        ## process data for Kmodes. Convert cont columns into float
+        for c in cont_sim_columns:
+            similarity_df[c] = similarity_df[c].astype('float')
+            
+#         kpro_model = KPrototypes(n_clusters=k, init = "Cao", n_init = 1, verbose=1)
+        kpro_pred = kpro_model.fit_predict(similarity_df[cate_sim_columns + cont_sim_columns], 
+                                                   categorical=[similarity_df.columns.get_loc(c) for c in cate_sim_columns])
         
-        similarity_df['similarity_label'] = kmodes_pred
-        similarity_df.drop(columns=sim_columns, inplace=True)
+        similarity_df['similarity_label'] = kpro_pred
+        similarity_df.drop(columns=cate_sim_columns + cont_sim_columns, inplace=True)
         self.df = self.df.merge(similarity_df, how = "left", on = self.dwelling_col)
 
 #Base class for interpolation, not meant to be instantiated
@@ -446,7 +466,7 @@ class CentroidInterpolator(Interpolator):
 
         score = 0
         best_clusterer = None
-        for i in range(50):
+        for i in range(10):
 
             self.apply_clustering()
             self.cross_validate_model()
