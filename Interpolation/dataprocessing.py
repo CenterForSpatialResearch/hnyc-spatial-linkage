@@ -69,7 +69,7 @@ def all_dwellings_sequenced(all_dwellings, known_dwellings, block_col, fill_colu
 
     ## fill in wherever makes sense
     #### 1. get rows of unknown dwellings that are in between the same block_col value
-    cons_dwellings = interpolation.get_consecutive_dwellings(prediction_data, column = block_col) 
+    cons_dwellings = interpolation.get_consecutive_dwellings(prediction_data, column = fill_column) 
     
     #### 2. if rows are also in between the same sequence, fill in the sequence
     ## dwelling_max is set, only interpolate those that fulfill.
