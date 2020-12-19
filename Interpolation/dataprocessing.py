@@ -60,7 +60,7 @@ def all_dwellings_sequenced(all_dwellings, known_dwellings, block_col, fill_colu
                             ward_col = "CENSUS_WARD_NUM", 
                             dwelling_col = "CENSUS_DWELLING_NUM",
                             dwelling_max=None):
-#     known_dwellings["Known"] = 1
+
     ## join all dwellings and known dwellings together
     prediction_data = dwellings_to_all(all_dwellings, known_dwellings, list(
         set(list(known_dwellings.columns)).difference(list(all_dwellings.columns))) + [ward_col,
@@ -68,9 +68,9 @@ def all_dwellings_sequenced(all_dwellings, known_dwellings, block_col, fill_colu
                                        [ward_col, dwelling_col])
 
     ## fill in wherever makes sense
-    #### 1. get rows of unknown dwellings that are in between the same block_col value
-    cons_dwellings = interpolation.get_consecutive_dwellings(prediction_data, column = fill_column) 
-    
+    #### 1. get rows of unknown dwellings that are in between the same fill_column value
+    cons_dwellings = interpolation.get_consecutive_dwellings(prediction_data, column = fill_column)
+
     #### 2. if rows are also in between the same sequence, fill in the sequence
     ## dwelling_max is set, only interpolate those that fulfill.
     if dwelling_max is not None:

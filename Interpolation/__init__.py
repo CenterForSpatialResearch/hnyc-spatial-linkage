@@ -402,6 +402,7 @@ class CentroidInterpolator(Interpolator):
             self.clusters = self.clustering_algo.fit_predict(to_cluster)
 
         self.block_cluster_map = {block: clust for block, clust in zip(self.block_centroids[self.ward].keys(), self.clusters)}
+#         print(self.block_cluster_map)
         self.df["cluster"] = self.df.apply(lambda row: self.block_cluster_map[row[self.block_col]], axis=1)
 
     """

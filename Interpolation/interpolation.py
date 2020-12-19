@@ -61,8 +61,7 @@ def get_consecutive_dwellings(df, column = "BLOCK_NUM"):
             
             if row.header == 1:  ## if it is also a start in addition to the end
                 index_start = row.Index
-                find = getattr(row, next_col)            
-
+                find = getattr(row, next_col) 
     return pd.concat(dataframes)
 
 """
