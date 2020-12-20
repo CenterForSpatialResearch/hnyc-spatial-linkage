@@ -45,6 +45,8 @@ def fill_in(df, fill_column, check_column):
             break
     if fill:
         df[fill_column] = df[fill_column].ffill()
+        if fill_column == 'sequence_id': ## if working with distance seq, also ffill sequence_order_enum
+            df["sequence_order_enum"] = df["sequence_order_enum"].ffill() 
     return df
 
 
@@ -80,14 +82,13 @@ def all_dwellings_sequenced(all_dwellings, known_dwellings, block_col, fill_colu
     
     interpolated_unknown.drop_duplicates(inplace=True) ## dwellings that start and end will be removed
     
-#     prediction_data["sequence_order_enum"] = prediction_data["sequence_order_enum"].ffill()  <<< should be put in fill_in()
-#     prediction_data = prediction_data.groupby("sequence_id").apply(sequences.sequence_order) <<< do not know what this is 11.24
-    
     ## Merge back to all dwelling data
     prediction_data = dwellings_to_all(prediction_data, interpolated_unknown, list(
         set(list(interpolated_unknown.columns)).difference(list(prediction_data.columns))) + [ward_col,
                                                                                        dwelling_col, fill_column],
                                        [ward_col, dwelling_col])
+    
+    
     prediction_data[fill_column] = np.where(prediction_data[fill_column+'_x'].isnull(), 
                                             prediction_data[fill_column+'_y'], 
                                             prediction_data[fill_column+'_x'])
@@ -96,7 +97,9 @@ def all_dwellings_sequenced(all_dwellings, known_dwellings, block_col, fill_colu
     ## Drop helper columns
     prediction_data.drop(columns=[fill_column+'_x', fill_column+'_y'], inplace=True)
     
-
+#     ## This has been disabled. Need to be debugged.
+#     prediction_data = prediction_data.groupby("sequence_id").apply(sequences.sequence_order)
+        
     return prediction_data
 
 """
