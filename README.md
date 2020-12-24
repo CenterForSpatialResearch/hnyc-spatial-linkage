@@ -1,5 +1,11 @@
 # HNYC Spatial Research on Spatial Linkages
 
+## Fall 2020
+1. Reworked the interpolation phase into (i) the interpolation phase and (ii) the model phase (see `hnyc-spatial-linkage/interpolation_notebooks/fall20_notebooks/PROCESS_INTERPOLATION.ipynb` and `PROCESS_MODEL_training_ward10.ipynb`).
+2. Extended the interpolation phase to all wards (except ward 12 and 19 which do not have enough known dwellings). The model phase is still only on ward 10.
+3. Initiated a new sequence similarity feature. There is still an issue with this. See the end of [`HNYC_Project/Projects/spatial_linkage/Spatial Linkage & Interpolation: Summer 2020.ppt`](https://docs.google.com/presentation/d/1fx_6B2YGXbn0jVElfkPmOMeAbnIiKuQpwnLW_d2HtS0/edit#slide=id.gb2865bd934_0_20) for more details. 
+4. (see notebookes in `interpolation_notebooks/fall20_notebooks/`.)
+
 ## Summer 2020
 1. Developed confidence score tuning process (see `disambiguation_1880` folder)
 2. Developed interpolation process (see `interpolation` folder for code and `interpolation_notebooks` folder for jupyter notebooks that document process)
