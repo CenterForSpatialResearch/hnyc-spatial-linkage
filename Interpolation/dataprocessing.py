@@ -45,8 +45,13 @@ def fill_in(df, fill_column, check_column):
             break
     if fill:
         df[fill_column] = df[fill_column].ffill()
-        if fill_column == 'sequence_id': ## if working with distance seq, also ffill sequence_order_enum
+        ## also ffill sequence order if working with sequence columns
+        if fill_column == 'sequence_id':
             df["sequence_order_enum"] = df["sequence_order_enum"].ffill() 
+            
+            
+        elif fill_column == 'enum_dist_id':
+            df["enum_dist_order"] = df["enum_dist_order"].ffill() 
     return df
 
 
@@ -55,7 +60,7 @@ Purpose: Combine dwellings with addresses, with added sequences and all dwelling
 all_dwellings: dataframe with all dwellings
 known_dwellings: dataframe with known_dwellings
 fill_column: columns to be fill in. Usually, sequence columns
-check_column: columns to check for fill in. Usually, the same as fill_column
+check_column: a list of columns to check for fill in. Usually, the same as fill_column
 returns: dataframe with all dwellings, with sequence ids, order_enum, order
 """
 def all_dwellings_sequenced(all_dwellings, known_dwellings, block_col, fill_column, check_column,
@@ -73,8 +78,8 @@ def all_dwellings_sequenced(all_dwellings, known_dwellings, block_col, fill_colu
     #### 1. get rows of unknown dwellings that are in between the same fill_column value
     cons_dwellings = interpolation.get_consecutive_dwellings(prediction_data, column = fill_column)
 
-    #### 2. if rows are also in between the same sequence, fill in the sequence
-    ## dwelling_max is set, only interpolate those that fulfill.
+    #### 2. if rows are also in between the same sequence, fill in the sequence.
+    ## If dwelling_max is set, only interpolate those that fulfill the condition.
     if dwelling_max is not None:
         cons_dwellings = interpolation.limit_dwellings_between(cons_dwellings, dwelling_max)
     interpolated_unknown = cons_dwellings.groupby('consecutive_dwelling_id').apply(fill_in, fill_column, check_column)
@@ -82,24 +87,34 @@ def all_dwellings_sequenced(all_dwellings, known_dwellings, block_col, fill_colu
     
     interpolated_unknown.drop_duplicates(inplace=True) ## dwellings that start and end will be removed
     
+    
+    ##if fill in sequence columns, we also need to deal with sequence order column
+    seq_order_dict = {'sequence_id': 'sequence_order_enum', 'enum_dist_id': 'enum_dist_order'}
+    order_columm = []
+    if fill_column in seq_order_dict.keys():
+        order_columm = [seq_order_dict[fill_column]]
+    else:
+        order_columm = []
+        
     ## Merge back to all dwelling data
     prediction_data = dwellings_to_all(prediction_data, interpolated_unknown, list(
         set(list(interpolated_unknown.columns)).difference(list(prediction_data.columns))) + [ward_col,
-                                                                                       dwelling_col, fill_column],
+                                                                                       dwelling_col, fill_column]+order_columm,
                                        [ward_col, dwelling_col])
-    
     
     prediction_data[fill_column] = np.where(prediction_data[fill_column+'_x'].isnull(), 
                                             prediction_data[fill_column+'_y'], 
                                             prediction_data[fill_column+'_x'])
-    ##must bring back sequence_order_enum as well ^^^
-    
     ## Drop helper columns
     prediction_data.drop(columns=[fill_column+'_x', fill_column+'_y'], inplace=True)
     
-#     ## This has been disabled. Need to be debugged.
-#     prediction_data = prediction_data.groupby("sequence_id").apply(sequences.sequence_order)
-        
+    ## work with order column
+    if fill_column in seq_order_dict.keys():
+        prediction_data[order_columm[0]] = np.where(prediction_data[order_columm[0]+'_x'].isnull(), 
+                                            prediction_data[order_columm[0]+'_y'], 
+                                            prediction_data[order_columm[0]+'_x'])
+        prediction_data.drop(columns=[order_columm[0]+'_x', order_columm[0]+'_y'], inplace=True)
+           
     return prediction_data
 
 """
