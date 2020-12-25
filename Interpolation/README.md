@@ -40,4 +40,5 @@ fill in all records within a dwelling with a match, resolving any conflicts in m
 5. `dataprocessing.py`: Contains functions related to dataframe manipulation, ei joining dwellings to all records, etc.
 6. `archive.py`: Contains functions that are no longer needed, but kept for reference as they are used in older
 development notebooks
+7. `interpolation_fillin.py`: Contains functions for the reworked interpolation phase (including merging the enumeration detail and the census data). 
     
