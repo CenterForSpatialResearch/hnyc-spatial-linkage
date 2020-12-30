@@ -1,5 +1,11 @@
 # HNYC Spatial Research on Spatial Linkages
 
+## Fall 2020
+1. Improvised elastic search match process to include more records (see `ES_matching/src` folder - Elastic_Search_1850_mn v02.ipynb)
+2. Disambiguation process on new matches (see `disambiguation_1850` folder) 
+3. Resolved dwelling conflicts on the new 1850 disambiguated output (that includes new matches) (`interpolation_notebooks/Concepts_and_Development/Dwelling_Addresses_Fill_In_and_Conflict_Resolution_Development_v2.ipynb`)
+4. Updated 'dwelling adress fill in' process to identify unique dwelling ids and then choose dwelling address through bipartite matching both for summer and fall 1850 disambiguated run (`interpolation_notebooks/Concepts_and_Development/Unique_Dwelling_Addresses_Fill_In_and_Conflict_Resolution_Development.ipynb`)
+
 ## Summer 2020
 1. Developed confidence score tuning process (see `disambiguation_1880` folder)
 2. Developed interpolation process (see `interpolation` folder for code and `interpolation_notebooks` folder for jupyter notebooks that document process)
