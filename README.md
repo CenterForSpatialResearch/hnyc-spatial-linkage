@@ -10,6 +10,7 @@ potential for improvement
 1. Explore rules for elastic search match
 2. Identify other weight combinations for confidence score tuning
 3. Explore methods for creating unique dwelling ids for interpolation process
+4. Make comparisons in the output of Summer and Fall 2020 (with extra matches) disambiguated and address fill in processes
 
 ## Summer 2020
 1. Developed confidence score tuning process (see `disambiguation_1880` folder)
