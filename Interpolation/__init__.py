@@ -8,6 +8,9 @@ import interpolation.sequences as sequences
 import interpolation.dataprocessing as dataprocessing
 from functools import reduce
 
+from kmodes.kprototypes import KPrototypes
+from sklearn.compose import ColumnTransformer
+
 #Store and modify census data post disambiguation and dwelling fillin/conflict resolution
 class CensusData:
 
@@ -36,16 +39,47 @@ class CensusData:
     d: maximum distance between dwellings within a sequence
     returns: sequences added to dwelling data
     """
-    def get_dwellings_dist_seq(self, d = 0.1):
+    def get_dwellings_dist_seq(self, d):
+#         print('d: ', d)
         dwellings = self.get_dwellings()
         dwellings.dropna(subset = [self.block_col], inplace = True)
         dwellings_cols = dwellings.groupby(self.ward_col, as_index=False).apply(
             lambda x: sequences.col_for_seq(x, X=self.x_col, Y=self.y_col))
         dwellings_cols = dwellings_cols.groupby(self.ward_col, as_index=False).apply(
-            lambda x: sequences.get_dist_seq(x, d))
+            lambda x: sequences.get_dist_seq(x, d))          
+            
         return dwellings_cols.loc[:, [self.ward_col, self.dwelling_col, "sequence_id", "num_between",
                                               "sequence_order_enum", "dist", "sequence_len"]].copy()
+    
+#     def get_dwellings_dist_seq_after(self, d):
+#         print('d: ', d)
+#         dwellings = self.get_dwellings()
+#         dwellings.dropna(subset = [self.block_col], inplace = True)
+#         dwellings_cols = dwellings.groupby(self.ward_col, as_index=False).apply(
+#             lambda x: sequences.col_for_seq(x, X=self.x_col, Y=self.y_col))
+#         dwellings_cols = dwellings_cols.groupby(self.ward_col, as_index=False).apply(
+#             lambda x: sequences.get_dist_seq_after(x, d))          
+            
+#         return dwellings_cols.loc[:, [self.ward_col, self.dwelling_col, "sequence_id", "num_between",
+#                                               "sequence_order_enum", "dist", "sequence_len"]].copy()
 
+#     """
+#     fill sequences of unknown records that are in between 2 known records of the same sequence
+#     """
+#     def fill_within(self, df, dwelling_col, seq_col):
+#         min_dwelling_id = min(df[dwelling_col])
+#         max_dwelling_id = max(df[dwelling_col])
+#         dwelling_id_df = pd.DataFrame({dwelling_col: range(min_dwelling_id, max_dwelling_id+1)})
+
+#         dwellings_cols = df.merge(dwelling_id_df, on=dwelling_col, how='right')
+#         dwellings_cols.sort_values(dwelling_col, inplace=True)
+#         dwellings_cols.reset_index(inplace=True)
+#         dwellings_cols['ffill'] = dwellings_cols[seq_col].ffill()
+#         dwellings_cols['bfill'] = dwellings_cols[seq_col].bfill()
+#         dwellings_cols[seq_col] = np.where(dwellings_cols['ffill'] == dwellings_cols['bfill'], dwellings_cols['bfill'], dwellings_cols[seq_col])
+#         dwellings_cols.drop(columns=['ffill', 'bfill'], inplace=True)
+#         return dwellings_cols
+        
     """
     Purpose: Create dataframe of all census records with sequences added in
     d: Maximum distance between dwellings within the same sequence
@@ -98,9 +132,10 @@ class CensusData:
     sets self.df to a dataframe with specified sequences and all census records
     """
     def apply_sequencing(self, d = 0.1, n = 40, distance = False, fixed = False, dwelling = False, enumerator = False,tuned = False, enumerator_dist = False):
+        print('d: ', d)
         sequences_dfs = []
         if distance:
-            dwellings_dist = tuned if tuned else self.get_dwellings_dist_seq(d)
+            dwellings_dist = tuned if tuned else self.get_dwellings_dist_seq(d)            
             sequences_dfs.append(dwellings_dist)
 
         if fixed:
@@ -115,9 +150,9 @@ class CensusData:
         if enumerator_dist:
             dwellings_dist = self.get_enum_seq(all = True)
             dwellings_dist.dropna(subset=[self.block_col], inplace=True)
-            dwellings_dist = dwellings_dist.groupby("enum_seq", as_index=False).apply(
+            dwellings_dist = dwellings_dist.groupby([self.ward_col, "enum_seq"], as_index=False).apply(
                 lambda x: sequences.col_for_seq(x, X=self.x_col, Y=self.y_col))
-            dwellings_dist = dwellings_dist.groupby("enum_seq", as_index=False).apply(
+            dwellings_dist = dwellings_dist.groupby([self.ward_col, "enum_seq"], as_index=False).apply(
                 lambda x: sequences.get_dist_seq(x, d))
 
             dwellings_dist.rename(columns = {"sequence_id":"enum_dist_id", "sequence_order_enum":"enum_dist_order", "dist":"enum_dist", "sequence_len":"enum_sequence_len"}, inplace = True)
@@ -125,9 +160,14 @@ class CensusData:
 
         self.df = reduce(lambda x, y: pd.merge(x, y, how = "left", on = [self.ward_col, self.dwelling_col]), sequences_dfs, self.data)
 
+        ## fill within for distance sequence
+#         if distance:
+#             self.df = self.df.groupby(self.ward_col, as_index=False).apply(lambda x: self.fill_within(x, self.dwelling_col, 'sequence_id'))
+        
         if enumerator_dist:
+#             self.df = self.df.groupby(self.ward_col, as_index=False).apply(lambda x: self.fill_within(x, self.dwelling_col, 'enum_dist_id'))
             self.df = self.df.dropna(subset = [self.pagenum])
-
+        
     """
     Purpose: Get sequences of dwellings visited by given enumerator in a single day
     enum_num: column name of census enumerator label
@@ -138,7 +178,7 @@ class CensusData:
         dwellings = self.get_dwellings()
         with_labels = []
         enum_label = 1
-        for id, df_org in dwellings.groupby([enum_num, date]):
+        for id, df_org in dwellings.groupby([self.ward_col, enum_num, date]):
             df = df_org.copy()
             df["enum_seq"] = enum_label
             enum_label += 1
@@ -168,6 +208,53 @@ class CensusData:
     def no_seq(self):
         self.df = self.data
 
+    """
+    Purpose: group records based on their similarity in certain columns
+    sim_columns: List of column names that will be used to measure the similarity
+    
+    The current self.df must contain only 1 ward
+    """
+    def apply_similarity(self, kpro_model, cate_sim_columns, cont_sim_columns=[]):
+        
+        if not isinstance(cate_sim_columns, list):
+            raise TypeError("'cate_sim_columns' must be a list")
+            
+        if not isinstance(cont_sim_columns, list):
+            raise TypeError("'cont_sim_columns' must be a list")
+            
+        if 'similarity_label' in self.df.columns:
+            self.df.drop(columns=['similarity_label'], inplace=True)
+        
+        dwellings = self.df.groupby([self.ward_col, self.dwelling_col], as_index = False).first()#.copy()
+        similarity_df = dwellings[cate_sim_columns + cont_sim_columns + [self.dwelling_col]].copy()
+        
+        ## fill in sequence_order
+        if 'sequence_order_enum' in cont_sim_columns:
+            similarity_df.loc[0, 'sequence_order_enum'] = -1
+            similarity_df['sequence_order_enum'] = similarity_df['sequence_order_enum'].ffill()
+        
+        similarity_df.fillna(value=-1, inplace=True)
+        
+        ## take only columns to be clustered
+        ## unknown values are treated as a new category
+#         similarity_df = self.df[sim_columns].copy()
+#         similarity_df.fillna(value=-1, inplace=True)
+        
+        ## process data for Kmodes. Convert cate columns into string
+        for c in cate_sim_columns:
+            similarity_df[c] = similarity_df[c].astype('str')
+            
+        ## process data for Kmodes. Convert cont columns into float
+        for c in cont_sim_columns:
+            similarity_df[c] = similarity_df[c].astype('float')
+            
+#         kpro_model = KPrototypes(n_clusters=k, init = "Cao", n_init = 1, verbose=1)
+        kpro_pred = kpro_model.fit_predict(similarity_df[cate_sim_columns + cont_sim_columns], 
+                                                   categorical=[similarity_df.columns.get_loc(c) for c in cate_sim_columns])
+        
+        similarity_df['similarity_label'] = kpro_pred
+        similarity_df.drop(columns=cate_sim_columns + cont_sim_columns, inplace=True)
+        self.df = self.df.merge(similarity_df, how = "left", on = self.dwelling_col)
 
 #Base class for interpolation, not meant to be instantiated
 class Interpolator:
@@ -196,8 +283,8 @@ class Interpolator:
     Purpose: Get a train test data, with dwellings only present in one or the other
     Stratified: If true stratify sample, if false, don't
     """
-    def stratified_train_test(self, stratified = True):
-        return interpolation.stratified_train_test(self.df, self.y, self.dwelling_col, stratified)
+    def stratified_train_test(self, stratified = True, k=1):
+        return interpolation.stratified_train_test(self.df, self.y, self.dwelling_col, stratified,k=k)
 
     """
     Purpose: Target encode train, test data
@@ -217,20 +304,40 @@ class Interpolator:
     def train_test_model(self, train, test, train_y = None, test_y = None):
 
         if train_y is None:
-            tr = train.loc[:,self.feature_names]
+            tr = train#.loc[:,self.feature_names + ['block_num']] ## block_num for later ref. Actually dropped when .fit()
             tr_y = train[self.y]
-            te = test.loc[:, self.feature_names]
+            te = test#.loc[:, self.feature_names + ['block_num']]
             te_y = test[self.y]
             self.model.fit(tr, tr_y)
             self.train_score = self.model.score(tr, tr_y)
             self.test_score = self.model.score(te, te_y)
 
         else:
-            tr = train.loc[:, self.feature_names]
-            te = train.loc[:, self.feature_names]
+            tr = train#.loc[:, self.feature_names+ ['block_num']]
+            te = train#.loc[:, self.feature_names+ ['block_num']]
             self.model.fit(tr, train_y)
             self.train_score = self.model.score(tr, train_y)
             self.test_score = self.model.score(te, test_y)
+            
+    def cross_validate_model(self, k=10, stratified=True):
+        
+        train_list, test_list = self.stratified_train_test(k=k, stratified=stratified)
+        self.train_score = []
+        self.test_score = []
+        for i in range(k):
+            tr = train_list[i]#.loc[:,self.feature_names+ ['block_num']]
+            tr_y = train_list[i][self.y]
+            te = test_list[i]#.loc[:, self.feature_names+ ['block_num']]
+            te_y = test_list[i][self.y]
+#             print(tr.shape, tr_y.shape, te.shape, te_y.shape)
+#             print(self.model)
+            self.model.fit(tr, tr_y)
+            self.train_score.append(self.model.score(tr, tr_y))
+            self.test_score.append(self.model.score(te, te_y))
+#         self.temp_train_list = train_list ## Check for info leak in cross validation
+#         self.temp_test_list = test_list ## Check for info leak in cross validation
+        self.last_te = te
+        self.last_te_y = te_y
 
     """
     Purpose: Use model for predicting values after training
@@ -295,6 +402,7 @@ class CentroidInterpolator(Interpolator):
             self.clusters = self.clustering_algo.fit_predict(to_cluster)
 
         self.block_cluster_map = {block: clust for block, clust in zip(self.block_centroids[self.ward].keys(), self.clusters)}
+#         print(self.block_cluster_map)
         self.df["cluster"] = self.df.apply(lambda row: self.block_cluster_map[row[self.block_col]], axis=1)
 
     """
@@ -351,6 +459,7 @@ class CentroidInterpolator(Interpolator):
     Purpose: Handle instability in kmeans results by saving the best model and best score after 100 runs
     n: number of clusters
     *Note assumes model is a pipeline that includes preprocessing
+    * 10/31: change to CV when evaluate best k
     """
     def kmeans_best(self, n):
 
@@ -358,18 +467,21 @@ class CentroidInterpolator(Interpolator):
 
         score = 0
         best_clusterer = None
-        for i in range(100):
+        for i in range(10):
 
             self.apply_clustering()
-            train, test = self.stratified_train_test()
-            self.train_test_model(train, test)
+            self.cross_validate_model()
+            
+            
+#             train, test = self.stratified_train_test()
+#             self.train_test_model(train, test)
 
-            if self.test_score > score:
-                score = self.test_score
+            if np.mean(self.test_score) > score:
+                score = np.mean(self.test_score) 
                 best_clusterer = deepcopy(self.clustering_algo)
 
-            if i % 50 == 0:
-                print("n is {} and it's the {}th iteration".format(n, i))
+            if (i+1) % 10 == 0:
+                print("n is {} and it's the {}th iteration".format(n, i+1))
 
         return score, best_clusterer
 
@@ -379,7 +491,5 @@ class CentroidInterpolator(Interpolator):
     """
     def set_clustering_algo(self, clustering_algo):
         self.clustering_algo = clustering_algo
-
-
 
 

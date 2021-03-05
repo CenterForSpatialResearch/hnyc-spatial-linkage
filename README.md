@@ -1,5 +1,11 @@
 # HNYC Spatial Research on Spatial Linkages
 
+## Fall 2020
+1. Reworked the interpolation phase into (i) the interpolation phase and (ii) the model phase (see `hnyc-spatial-linkage/interpolation_notebooks/fall20_notebooks/PROCESS_INTERPOLATION.ipynb` and `PROCESS_MODEL_training_ward10.ipynb`).
+2. Extended the interpolation phase to all wards (except ward 12 and 19 which do not have enough known dwellings). The model phase is still only on ward 10. Cross validation is implemented for the model phase. 
+3. Initiated a new sequence similarity feature. There is still an issue with this. See the end of [`HNYC_Project/Projects/spatial_linkage/Spatial Linkage & Interpolation: Summer 2020.ppt`](https://docs.google.com/presentation/d/1fx_6B2YGXbn0jVElfkPmOMeAbnIiKuQpwnLW_d2HtS0/edit#slide=id.gb2865bd934_0_20) for more details. 
+4. All work is done on 1850 Manhattan. (see notebookes in `interpolation_notebooks/fall20_notebooks/`.)
+
 ## Summer 2020
 1. Developed confidence score tuning process (see `disambiguation_1880` folder)
 2. Developed interpolation process (see `interpolation` folder for code and `interpolation_notebooks` folder for jupyter notebooks that document process)
@@ -83,6 +89,13 @@ Similar, but no ED and address data, only ward data in the census.
        - `Street_Dictionaries.ipynb`: Tried out looking at street dictionaries for dwellings in between
        - `Block Number Prediction.ipynb`: Initial experiment with predicting block numbers
        - `Interpolation between known address development.ipynb`: Process of looking at values between known dwellings
+   - `fall20_notebooks/`
+      - `EDA_INTERPOLATION_[].ipynb`: the eda files for the interpolation phase
+      - `EDA_MODEL_[].ipynb`: the eda files for the model phase.
+      - `PROCESS_INTERPOLATION.ipynb`: the process file for the interpolation phase. It reads in a file from `interpolation_notebooks/Process_Documentation/Disambiguation_Analysis_v02.ipynb`. This is an extension of `interpolation_notebooks/Process_Documentation/Interpolation_v02.ipynb`.
+      - `PROCESS_MODEL_training_ward10.ipynb`: the process file for the model phase. It reads in the file from `PROCESS_INTERPOLATION.ipynb`. It is currently applied only on ward 10.
+      - `OUTDATED_model inspection.ipynb`: old code. It inspects different setting of a mdoel.
+      
 - `/interpolation` See read me within this folder for details
 - `/disambiguation` is a python module containing wrapper functions needed in the disambiguation process
   - `init.py` contains a Disambiguator object, when instantiated can be used to run entire disambiguation process, calling functions from below (see `linkage_eda.ipynb` for example on usage)
@@ -100,6 +113,7 @@ Data is available in the HNYC Spatial Linkage Google Drive `HNYC_Project/Project
 - 1850 disambiguated output: `1850_disambiguated.csv`
 - 1850 disambiguated output 10/2020 (current): `1850_mn_match_v02.csv`
 - 1850 ES matches: `es-1850-22-9-2020.csv`
+- 1850 Interpolated output 12/2020 (current): `census_interpolated_1850_mn_20201219.csv`
 
 ### 1880
 - Matches with confidence score (raw input for 1880 disambiguation processes): `matches.csv`

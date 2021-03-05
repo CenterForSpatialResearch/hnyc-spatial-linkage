@@ -6,11 +6,13 @@ from sklearn.model_selection import StratifiedShuffleSplit
 from category_encoders.target_encoder import TargetEncoder
 import math
 from interpolation import dataprocessing
+from sklearn.model_selection import ShuffleSplit
 
 """
 Purpose: Generate set of dwellings that we could potentially interpolate values for column by fill in
 dwellings_df: dataframe with unique dwellings with known addresses/blocks
-returns: dataframe with numb_between_real column, and only dwellings that fulfill criteria
+returns: dataframe with numb_between_real column of only dwellings that have the same `column` value as
+        the next dwelling and have some unknow dwelling between.
 """
 def same_next(dwellings_df, column = "BLOCK_NUM"):
     dwellings_df = dwellings_df.copy()
@@ -18,15 +20,17 @@ def same_next(dwellings_df, column = "BLOCK_NUM"):
     dwellings_df = dwellings_df[dwellings_df[str(column) + "_next"] == dwellings_df[column]]
     dwellings_df["num_between_real"] = dwellings_df["num_between"] - 1
     dwellings_df = dwellings_df[dwellings_df["num_between_real"] != 0]
+    dwellings_df['header'] = 1
     return dwellings_df
 
 """
 Purpose: limit number of dwellings in between known values for fill in
 df: dataframe with num_between_real column filled in for all dwellings
-limit: 
+limit: The number of unknwon dwellings in between that is allowed
+11/24 df must be batches of consecutive dwellings that share the same `num_between_real`
 """
 def limit_dwellings_between(df, limit):
-    df["num_between_real"] =  df["num_between_real"].ffill()
+    df["num_between_real"] = df["num_between_real"].ffill()
     return df[df["num_between_real"] <= limit].copy()
 
 """
@@ -34,6 +38,7 @@ Purpose: Get dwellings with relevant columns for fill in
 df: dataframe with all dwellings, with sequence information
 column: column to seek consecutive value
 returns: dataframes with relevant dwellings for fillin, and the values they would be filled in with
+[11/23 Note: return df of consecutive dwellings between two known dwellings of the same block#, inclusive]
 """
 def get_consecutive_dwellings(df, column = "BLOCK_NUM"):
 
@@ -44,15 +49,19 @@ def get_consecutive_dwellings(df, column = "BLOCK_NUM"):
     dataframes = []
     find = None
     for row in df.itertuples():
-        if row.Known == 1:
+        if find is None and row.header == 1: ## start
             index_start = row.Index
             find = getattr(row, next_col)
-
-        elif find is not None and find == getattr(row, column):
+        elif find is not None and find == getattr(row, column): ## end
             index_end = row.Index + 1
-            dataframes.append(df.iloc[index_start:index_end])
+            consec_dwellings = df.iloc[index_start:index_end].copy()
+            consec_dwellings['consecutive_dwelling_id'] = index_start
+            dataframes.append(consec_dwellings)
             find = None
-
+            
+            if row.header == 1:  ## if it is also a start in addition to the end
+                index_start = row.Index
+                find = getattr(row, next_col) 
     return pd.concat(dataframes)
 
 """
@@ -95,7 +104,30 @@ df: dataframe with census records of interest
 dwelling_col: name of dwelling number column
 y_col: name of column with y data
 """
-def stratified_train_test(df, y, dwelling_col, stratified = True):
+def stratified_train_test(df, y, dwelling_col, stratified = True, k=10):
+
+    ## Stratified for cross validation
+    if k > 1:
+        train_dwellings_list = []
+        if stratified:
+            db = df.loc[:, [dwelling_col, y]].groupby(dwelling_col, as_index=False).first().reset_index(
+                drop=True).copy()
+            for train_index, _ in StratifiedShuffleSplit(n_splits=k, test_size=0.2, random_state=123).split(db[dwelling_col],
+                                                                                                         db[y]):
+                train_dwellings_list.append(db.loc[train_index, dwelling_col])
+        else:
+            dwellings = df[dwelling_col].unique()
+            
+            for train_index, _ in ShuffleSplit(n_splits=k, test_size=0.2, random_state=123).split(dwellings):
+                train_dwellings_list.append(dwellings[train_index])
+        
+        train_list = []
+        test_list = []
+        for dw in train_dwellings_list:
+            train_list.append(df[df[dwelling_col].isin(dw)].copy())
+            test_list.append(df[~df[dwelling_col].isin(dw)].copy())
+        
+        return train_list,test_list
 
     if stratified:
         db = df.loc[:, [dwelling_col, y]].groupby(dwelling_col, as_index=False).first().reset_index(
