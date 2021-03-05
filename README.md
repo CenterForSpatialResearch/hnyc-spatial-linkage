@@ -5,6 +5,16 @@
 2. Extended the interpolation phase to all wards (except ward 12 and 19 which do not have enough known dwellings). The model phase is still only on ward 10. Cross validation is implemented for the model phase. 
 3. Initiated a new sequence similarity feature. There is still an issue with this. See the end of [`HNYC_Project/Projects/spatial_linkage/Spatial Linkage & Interpolation: Summer 2020.ppt`](https://docs.google.com/presentation/d/1fx_6B2YGXbn0jVElfkPmOMeAbnIiKuQpwnLW_d2HtS0/edit#slide=id.gb2865bd934_0_20) for more details. 
 4. All work is done on 1850 Manhattan. (see notebookes in `interpolation_notebooks/fall20_notebooks/`.)
+1. Improvised elastic search match process to include more records for both 1880 and 1850 (see `ES_matching/src` folder - Elastic_Search_1850_mn v02.ipynb)
+2. Disambiguation process on new matches (see `disambiguation_1850` folder) 
+3. Resolved dwelling conflicts on the new 1850 disambiguated output (that includes new matches) (`interpolation_notebooks/Concepts_and_Development/Dwelling_Addresses_Fill_In_and_Conflict_Resolution_Development_v2.ipynb`)
+4. Updated 'dwelling adress fill in' process to identify unique dwelling ids and then choose dwelling address through bipartite matching both for summer and fall 1850 disambiguated run (`interpolation_notebooks/Concepts_and_Development/Unique_Dwelling_Addresses_Fill_In_and_Conflict_Resolution_Development.ipynb`)
+
+potential for improvement
+1. Explore rules for elastic search match
+2. Identify other weight combinations for confidence score tuning
+3. Explore methods for creating unique dwelling ids for interpolation process
+4. Make comparisons in the output of Summer and Fall 2020 (with extra matches) disambiguated and address fill in processes
 
 ## Summer 2020
 1. Developed confidence score tuning process (see `disambiguation_1880` folder)
