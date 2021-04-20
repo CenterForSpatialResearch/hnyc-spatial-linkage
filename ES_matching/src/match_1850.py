@@ -1,7 +1,7 @@
 from elasticsearch import Elasticsearch
 import pandas as pd
 import numpy as np
-import json, csv
+import json, csv, time
 from metaphone import doublemetaphone
 from elasticsearch import exceptions
 
@@ -63,7 +63,6 @@ def match_addr():
                 continue
             
             if res['hits']['total']['value']!= 0:
-                match+=1
                 for i in res['hits']['hits']:
                     i = i['_source']
                     content = ""
@@ -74,6 +73,7 @@ def match_addr():
                         content = content + str(data[j]) + "\t"
 
                     writer.writerow(content.rstrip("\t").split("\t"))
+                    match+=1
             else:
                 fw2.write(str(data['CD_RECORD_ID'])+"\n")
                 unmatch+=1
@@ -81,4 +81,7 @@ def match_addr():
     print(count,match,unmatch)
 
 if __name__=='__main__':
+    st = time.time()
     match_addr()
+    end = time.time()
+    print(config["es-index"] +" "+ str(end-st))
