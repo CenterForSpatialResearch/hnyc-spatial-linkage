@@ -1,7 +1,7 @@
 from elasticsearch import Elasticsearch
 import pandas as pd
 import numpy as np
-import json, logging, csv
+import json, logging, csv, time
 from metaphone import doublemetaphone
 from argparse import ArgumentParser
 from elasticsearch import exceptions
@@ -84,7 +84,6 @@ def get_matches():
                 continue
         
             if res['hits']['total']['value']!= 0:
-                count_match+=1
                 for i in res['hits']['hits']:
                     i = i['_source']
                     content = ""
@@ -95,6 +94,7 @@ def get_matches():
                         content = content + str(data[j]) + "\t"
 
                     writer.writerow(content.rstrip("\t").split("\t"))
+                    count_match+=1
 
                 fw2.write(str(data['CD_RECORD_ID'])+"\n")
                 count_unmatch+=1
@@ -110,4 +110,7 @@ def export_data(data):
     json.dump(data, open('../../data/matched_data.json','w'))
 
 if __name__=='__main__':
+    st = time.time()
     get_matches()
+    end = time.time()
+    logger.warning(config["es-index"] +" "+ str(end-st))
