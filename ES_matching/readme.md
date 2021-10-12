@@ -20,3 +20,14 @@ For non-Linux users:
      - this will give write permissions to log files
 3. Run `pip install -r requirements.txt` to install dependencies
 4. Run scripts as above!
+
+
+# Matching Output Statistics
+
+Pruthvi's trials
+
+|        Type       	| Manhattan 	| Brooklyn 	|
+|-------------------	|-----------	|----------	|
+| Total Records     	|           	|          	|
+| Matched Records   	| 60581     	| 7821     	|
+| Unmatched Records 	| 33426     	| 5062     	|
