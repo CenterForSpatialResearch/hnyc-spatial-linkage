@@ -1,0 +1,18 @@
+{
+    "host": "localhost",
+    "port": 9200,
+    "year": 1850,
+    "cd_filename": "cd_1850_mn.csv",
+    "census_filename": "census_1850_mn_20200921.csv",
+    "census_first_name": "CENSUS_FIRST_NAME",
+    "census_last_name": "CENSUS_LAST_NAME",
+    "match_output_filename": "test_mn.csv",
+    "unmatch_output_filename": "test_u_mn.csv",
+    "es-index": "mn-census-1850",
+    "es-id": "CENSUS_IPUMS_UID",
+    "ingest_size": 5000,
+    "metaphone": 1,
+    "edit_distance": 2,
+    "output_census_cols": ["CENSUS_INDEX", "CENSUS_IPUMS_UID", "CENSUS_SERIAL", "CENSUS_HH_NUM", "CENSUS_SEQ_NUM", "CENSUS_REEL", "CENSUS_PAGENUM", "CENSUS_LINE", "CENSUS_AGE", "CENSUS_GENDER", "CENSUS_RACE", "CENSUS_LABFORCE", "CENSUS_OCCUPATION", "CENSUS_IMPREL", "CENSUS_FIRST_NAME", "CENSUS_LAST_NAME", "CENSUS_DWELLING_NUM", "CENSUS_DWELLING_SEQ", "CENSUS_DWELLING_SIZE", "CENSUS_GEOG", "CENSUS_WARD_NUM"],
+    "output_city_directory_cols": ["UID", "CD_INDEX","CD_RECORD_ID","CD_F_FIRST_NAME","CD_F_LAST_NAME", "CD_OCCUPATION","CD_H_ADDRESS", "CD_H_HOUSE_NUMBER", "CD_H_STREET_NAME","CD_BLOCK_NUM", "CD_WARD_NUM","CD_X", "CD_Y", "CD_STREET_ID"]
+}
