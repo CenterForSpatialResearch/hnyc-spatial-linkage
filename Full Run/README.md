@@ -2,7 +2,7 @@ This is a full run of the record linkage pipeline from ES to Interpolation on 18
 Before running the notebook, upload all input files (census, cd, and enumeration details) as well as supportive python files (in the "Files" section). 
 Also, install all the required packages. 
 
-## Current Results on 1850 Data
+## Current Results on 1850 Data (Fall 2021) 
 ###  Initial Matching (ES) 
 
 | | Manhattan | Brooklyn |
@@ -33,3 +33,4 @@ Proportion of records without any address info (block or street) after interpola
 4. Create main.py to run through the whole process
 5. Check and clean current codes
 6. Consider incorporating features generated in experiments into the whole process
+7. Standardize address information in cd records
